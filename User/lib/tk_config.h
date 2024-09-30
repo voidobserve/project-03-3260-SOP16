@@ -398,7 +398,7 @@
  * TK24 通道灵敏度
  */
 #define TK24_CH_EN                      (1)
-#define TK24_THR_DATA                   (75) // 
+#define TK24_THR_DATA                   (75) // 基本上可以识别出短按、长按、双击
 // #define TK24_THR_DATA                   (125) // 
 // #define TK24_THR_DATA                   (150) // 
 // #define TK24_THR_DATA                   (175) // 

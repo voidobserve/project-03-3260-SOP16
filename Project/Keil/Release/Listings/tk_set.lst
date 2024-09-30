@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 1   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TK_SET
@@ -62,7 +62,7 @@ line level    source
   51          volatile unsigned short xdata __tk_ch_data_3[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 8);
   52          volatile unsigned short xdata __tk_ch_data_4[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 10);
   53          volatile unsigned short xdata __tk_ch_data_5[TK_CH_USE];
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 2   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 2   
 
   54          volatile unsigned short xdata __tk_ch_data_6[TK_CH_USE];
   55          volatile unsigned short xdata __tk_ch_fth[TK_CH_USE];
@@ -126,7 +126,7 @@ line level    source
                       {
                           4u,
                           TK4_THR_DATA,
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 3   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 3   
 
                       },
               #endif
@@ -190,7 +190,7 @@ line level    source
  175          #if TK13_CH_EN
                       {
                           13u,
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 4   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 4   
 
                           TK13_THR_DATA,
                       },
@@ -254,7 +254,7 @@ line level    source
  237          
  238          #if TK22_CH_EN
                       {
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 5   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 5   
 
                           22u,
                           TK22_THR_DATA,
@@ -318,7 +318,7 @@ line level    source
  299   3                  else
  300   3                  {
  301   4                      P1_MD1 &= ~(0x3 << (__tk_ch_index[i] - 12) * 2);
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 6   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 6   
 
  302   4                      P1_MD1 |= (0x3 << (__tk_ch_index[i] - 12) * 2);
  303   4                  }
@@ -382,7 +382,7 @@ line level    source
  361   1          TK_CON0 = 0x4;
  362   1          TK_CON1 = 0x1E;
  363   1          TK_CON2 = 0x02;
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 7   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 7   
 
  364   1      }
  365          
@@ -446,7 +446,7 @@ line level    source
  420   2              __tk_ch_index[i] = (u8)(TK_CH_EN_BUG[i][0] & 0xff); // 存放按键通道信息
  421   2              __tk_ch_fth[i] = TK_CH_EN_BUG[i][1];                // 存放按键通道信息
  422   2              __tk_i_set[i] = TK_CURR_GEAR;                       // 充电电流
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 8   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 8   
 
  423   2              __tk_ch_en |= (1UL << __tk_ch_index[i]);            // 按键通道使能
  424   2          }
@@ -510,7 +510,7 @@ line level    source
  482   2              // delay_ms(500);
  483   2              // LED6 = 0;
  484   2              // delay_ms(500);
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 9   
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 9   
 
  485   2      
  486   2              // 测试通过

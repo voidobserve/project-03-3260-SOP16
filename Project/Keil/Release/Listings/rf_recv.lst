@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 1   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE RF_RECV
@@ -62,7 +62,7 @@ line level    source
               
                       // 配置P0_2为输入模式
                       P0_MD0 &= ~GPIO_P02_MODE_SEL(0x01);
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 2   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 2   
 
                       // 配置P0_2为下拉，因为RF接收模块的输出在空闲时默认为低电平
                       P0_PD |= GPIO_P02_PULL_PD(0x01);
@@ -126,7 +126,7 @@ line level    source
  109   1              // 进入中断设置IP，不可删除
  110   1              __IRQnIPnPush(TMR0_IRQn);
  111   1      
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 3   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 3   
 
  112   1              // ---------------- 用户函数处理 -------------------
  113   1      
@@ -190,7 +190,7 @@ line level    source
               
                               // 根据引脚当前的电平来打开/关闭定时器TMR0，最后记录一个高电平信号的持续时间
                               if (RFIN == 1)
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 4   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 4   
 
                               {
                                       // 如果此时引脚是高电平，读取记录的低电平的时间
@@ -254,7 +254,7 @@ line level    source
               
                                       if (i >= 24)
                                       {
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 5   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 5   
 
                                               // 如果接收了24位数据（0~23，最后一次i++直接变成24），说明一次接收完成
                                               recv_rf_flag = 1;
@@ -318,7 +318,7 @@ line level    source
  295   3                              // 如果收到了一次完整的高电平（960us的"1"或320us的"0"）
  296   3                              recv_bit_flag = 0; // 清除标志位
  297   3      
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 6   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 6   
 
  298   3                              if (low_level_time > 50)
  299   3                              {
@@ -382,7 +382,7 @@ line level    source
  357          // 如果 参数 index 为NULL，则不会给参数index对应的空间赋值
  358          void appear_themost(u32 *arr, u32 arr_len, u32 *element, u32 *index)
  359          {
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 7   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 7   
 
  360   1              u32 themost = 0;                // 出现次数最多的元素的值
  361   1              u16 themost_index = -1; // 出现次数最多的元素所在数组中的下标
@@ -446,7 +446,7 @@ line level    source
  419   1              u32 index = 0;
  420   1              // int i = 0; // 循环计数值 （测试用）
  421   1      
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 8   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 8   
 
  422   1              if (recv_rf_flag)
  423   1              {
@@ -510,7 +510,7 @@ line level    source
  481          {
  482   1              int i = 0;
  483   1              unsigned char isMatch = 0; // 标志位，器件地址是否与flash中的符合
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 9   
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 9   
 
  484   1      
  485   1              // 这一项测试后发现功能是正常的
@@ -574,7 +574,7 @@ line level    source
                                               break;
               
                                       case KEY_RF315_D: // 如果是遥控器按键D
-C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 15:17:10 PAGE 10  
+C51 COMPILER V9.60.7.0   RF_RECV                                                           09/30/2024 16:17:08 PAGE 10  
 
                                               send_keyval(KEY_RF315_D);
                                               break;

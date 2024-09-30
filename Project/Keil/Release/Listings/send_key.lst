@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 15:17:10 PAGE 1   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SEND_KEY
@@ -62,7 +62,7 @@ line level    source
              -625us计数一次
   51   1          TMR1_CONL &= ~TMR_MODE_SEL(0x03);     // 清除TMR1的模式配置寄存器
   52   1          TMR1_CONL |= TMR_MODE_SEL(0x01);      // 配置TMR1的模式为计数器模式，最后对HIRC的脉冲进行计数
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 15:17:10 PAGE 2   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 2   
 
   53   1      
   54   1          TMR1_CONH &= ~TMR_PRD_PND(0x01); // 清除TMR1的计数标志位，表示未完成计数
@@ -126,7 +126,7 @@ line level    source
  112   1          __IRQnIPnPush(TMR1_IRQn);
  113   1      
  114   1          // ---------------- 用户函数处理 -------------------
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 15:17:10 PAGE 3   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 3   
 
  115   1          // 周期中断
  116   1          if (TMR1_CONH & TMR_PRD_PND(0x1))
@@ -190,7 +190,7 @@ line level    source
  173   5                      }
  174   4                  }
  175   3      
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 15:17:10 PAGE 4   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 4   
 
  176   3                  // 发送完一个周期后，对应的计数值加一
  177   3                  cur_period++;
@@ -254,7 +254,7 @@ line level    source
  235   1      
  236   1      #if 0
                   tmr2_enable();       // 打开定时器TMR2，这里通过复用定时器来实现延时10ms
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 15:17:10 PAGE 5   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 5   
 
                   while (tmr2_cnt < 2) // TMR2开启5ms后才会将这个计数值加一
                   {
