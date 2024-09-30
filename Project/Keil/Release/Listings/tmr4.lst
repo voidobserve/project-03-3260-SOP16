@@ -1,0 +1,85 @@
+C51 COMPILER V9.60.7.0   TMR4                                                              09/30/2024 15:17:10 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR4
+OBJECT MODULE PLACED IN .\Release\Objects\tmr4.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\tmr4.c LARGE OPTIMIZE(8,SPEED) BROWSE INTVECTOR(0X000C) INCDI
+                    -R(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\tmr4.lst) O
+                    -BJECT(.\Release\Objects\tmr4.obj)
+
+line level    source
+
+   1          #include "tmr4.h"
+   2          
+   3          #define TMR4_CNT_TIME 1520 // 1520 * 0.65625us 约等于1000us，1ms
+   4          
+   5          volatile u32 tmr4_cnt = 0; // 定时器TMR4的计数值（每次在中断服务函数中会加一）
+   6          // volatile bit tmr4_flag = 0; // tmr4中断服务函数中会置位的标志位
+   7          
+   8          // 定时器TMR4的初始化（初始化完成后，默认是关闭的）
+   9          void tmr4_config(void)
+  10          {
+  11   1          __EnableIRQ(TMR4_IRQn);                                   // 打开TIMER4模块中断
+  12   1          TMR_ALLCON = TMR4_CNT_CLR(0x1);                           // Timer4 计数清零
+  13   1          TMR4_CAP10 = TMR4_PRD_VAL_L((TMR4_CNT_TIME >> 0) & 0xFF); // 周期低八位寄存器
+  14   1          TMR4_CAP11 = TMR4_PRD_VAL_H((TMR4_CNT_TIME >> 8) & 0xFF); // 周期高八位寄存器
+  15   1          TMR4_CON0 = TMR4_PRESCALE_SEL(0x05) |                     // 32分频
+  16   1                      TMR4_SOURCE_SEL(0x7) |                        // 计数源选择系统时钟
+  17   1                      TMR4_MODE_SEL(0x0);                           // 计数模式
+  18   1          TMR4_IE0 = TMR4_PRD_IRQ_EN(0x1);                          // 使能计数值等于周期值中断
+  19   1          TMR4_EN = TMR4_EN(0x0);                                   // 不使能定时器
+  20   1      
+  21   1          IE_EA = 1; // 使能总中断
+  22   1      }
+  23          
+  24          // 开启定时器TMR4，开始计时
+  25          void tmr4_enable(void)
+  26          {
+  27   1          TMR4_EN = TMR4_EN(0x1); // 使能定时器
+  28   1      }
+  29          
+  30          // 关闭定时器，清空计数值
+  31          void tmr4_disable(void)
+  32          {
+  33   1          TMR4_EN = TMR4_EN(0x0);         // 不使能定时器
+  34   1          TMR_ALLCON = TMR4_CNT_CLR(0x1); // Timer4 计数清零
+  35   1      }
+  36          
+  37          // TMR4中断服务函数
+  38          void TIMR4_IRQHandler(void) interrupt TMR4_IRQn
+  39          {
+  40   1      #if 1 // 定时器的定时中断
+  41   1          // 进入中断设置IP，不可删除
+  42   1          __IRQnIPnPush(TMR4_IRQn);
+  43   1      
+  44   1          // ---------------- 用户函数处理 -------------------
+  45   1          // 计数值等于周期值中断
+  46   1          if (TMR4_FLAG0 & TMR4_PRD_FLAG(0x1))
+  47   1          {
+  48   2              TMR4_CLR0 |= TMR4_PRD_FLG_CLR(0x1);
+  49   2      
+  50   2              tmr4_cnt++;
+  51   2      
+  52   2              // P24 = ~P24; // 测试用，看看中断触发时间是否一致
+  53   2          }
+C51 COMPILER V9.60.7.0   TMR4                                                              09/30/2024 15:17:10 PAGE 2   
+
+  54   1      
+  55   1          // 退出中断设置IP，不可删除
+  56   1          __IRQnIPnPop(TMR4_IRQn);
+  57   1      #endif
+  58   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    118    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      4    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

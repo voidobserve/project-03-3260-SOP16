@@ -1,0 +1,559 @@
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TK_SET
+OBJECT MODULE PLACED IN .\Release\Objects\tk_set.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\lib\tk_set.c LARGE OPTIMIZE(8,SPEED) BROWSE INTVECTOR(0X000C)
+                    - INCDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\tk_se
+                    -t.lst) OBJECT(.\Release\Objects\tk_set.obj)
+
+line level    source
+
+   1          /**
+   2           ******************************************************************************
+   3           * @file    User/tk_lib.c
+   4           * @author  HUGE-IC Application Team
+   5           * @version V1.0.0
+   6           * @date    05-20-2022
+   7           * @brief   Main program body
+   8           ******************************************************************************
+   9           * @attention
+  10           * tk_set.cÎÄ¼þÊÇÏµÍ³Ê¹ÓÃµÄÎÄ¼þ£¬²»½¨ÒéÐÞ¸Ä¡£
+  11           * ÒÔÏÂº¯ÊýºÍ±äÁ¿ÓÃ»§²»ÐèÒªÐÞ¸Ä
+  12           *
+  13           *
+  14           *
+  15           ******************************************************************************
+  16           */
+  17          
+  18          /* Includes ------------------------------------------------------------------*/
+  19          #include "include.h"
+  20          #include "rf_recv.h" // RF½ÓÊÕÏà¹ØµÄ½Ó¿Ú
+  21          #include "my_gpio.h" // Êä³ö¼üÖµµÄÒý½Å
+  22          #include "send_key.h"
+  23          
+  24          #include "rf_learn.h" // "Ñ§Ï°"£¬¼ÇÂ¼µØÖ·
+  25          
+  26          #include "flash.h" // µ¥Æ¬»úµÄflash²Ù×÷£¬²âÊÔÓÃ
+  27          
+  28          #include "tmr3.h" 
+  29          
+  30          #include "rf_scan.h"
+  31          
+  32          /** @addtogroup Template_Project
+  33           * @{
+  34           */
+  35          
+  36          /* Private typedef -----------------------------------------------------------*/
+  37          /* Private define ------------------------------------------------------------*/
+  38          /* Private macro -------------------------------------------------------------*/
+  39          /* Private variables ---------------------------------------------------------*/
+  40          /* Private function prototypes -----------------------------------------------*/
+  41          /* Private functions ---------------------------------------------------------*/
+  42          /**
+  43           * @}
+  44           */
+  45          // ÅäÖÃÒ»¸ö10msµÄÖÐ¶Ï
+  46          #define PEROID_VAL (SYSCLK / 128 / 100 - 1)
+  47          // ÓÃ»§²»ÔÊÐíÐÞ¸Ä
+  48          volatile unsigned short xdata __tk_ch_data_0[TK_CH_USE] _at_(0x6000 + 0);
+  49          volatile unsigned short xdata __tk_ch_data_1[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 2);
+  50          volatile unsigned short xdata __tk_ch_data_2[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 4);
+  51          volatile unsigned short xdata __tk_ch_data_3[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 8);
+  52          volatile unsigned short xdata __tk_ch_data_4[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 10);
+  53          volatile unsigned short xdata __tk_ch_data_5[TK_CH_USE];
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 2   
+
+  54          volatile unsigned short xdata __tk_ch_data_6[TK_CH_USE];
+  55          volatile unsigned short xdata __tk_ch_fth[TK_CH_USE];
+  56          volatile unsigned short xdata __tk_i_set[TK_CH_USE];
+  57          volatile unsigned char xdata __tk_update_cnt[TK_CH_USE];
+  58          volatile unsigned char xdata __tk_confirm_cnt[TK_CH_USE];
+  59          volatile unsigned char xdata __tk_leave_cnt[TK_CH_USE];
+  60          volatile unsigned char xdata __tk_ch_index[TK_CH_USE];
+  61          
+  62          // ÓÃ»§²»ÔÊÐíÐÞ¸Ä
+  63          unsigned long code __tk_adjust_line = TK_DATA_LINE;
+  64          unsigned short code __tk_adjust_time = TK_ADJUST_TIME;
+  65          unsigned short code __tk_adjust_diff_valu = TK_MAX_DIFF_VALU;
+  66          unsigned char code __tk_adjust_en = TK_ADJUST_EN;
+  67          
+  68          unsigned short code __tk_valid_time = TK_VALID_TIME;
+  69          unsigned short code __tk_long_key_time = TK_LONG_KEY_TIME;
+  70          unsigned short code __tk_noise_value = TK_NOISE_VAL;
+  71          unsigned char code __tk_cs_en = TK_CS_EN;
+  72          unsigned char code __tk_tp_en = TK_TP_EN;
+  73          unsigned char code __tk_nm_num = TK_MU_CNT;
+  74          unsigned char code __tk_base_update_cnt = TK_UPDATE_CNT;
+  75          unsigned char code __tk_nm_cm_value = TK_NM_CM_CNT;
+  76          unsigned char code __tk_cm_valu = TK_CM_VALE;
+  77          unsigned char code __tk_use_num = TK_CH_USE;
+  78          
+  79          /*
+  80          **´¥ÃþÍ¨µÀÐÅÏ¢±í
+  81          */
+  82          static u16 code TK_CH_EN_BUG[][2] =
+  83              {
+  84          #if TK0_CH_EN
+  85                  {
+  86                      0u,           // Í¨µÀÖµ
+  87                      TK0_THR_DATA, // ÃÅÏÞÖµ
+  88                  },
+  89          #endif
+  90          
+  91          #if TK1_CH_EN
+                      {
+                          1u,
+                          TK1_THR_DATA,
+                      },
+              #endif
+  97          
+  98          #if TK2_CH_EN
+  99                  {
+ 100                      2u,
+ 101                      TK2_THR_DATA,
+ 102                  },
+ 103          #endif
+ 104          
+ 105          #if TK3_CH_EN
+ 106                  {
+ 107                      3u,
+ 108                      TK3_THR_DATA,
+ 109                  },
+ 110          #endif
+ 111          
+ 112          #if TK4_CH_EN
+                      {
+                          4u,
+                          TK4_THR_DATA,
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 3   
+
+                      },
+              #endif
+ 118          
+ 119          #if TK5_CH_EN
+                      {
+                          5u,
+                          TK5_THR_DATA,
+                      },
+              #endif
+ 125          
+ 126          #if TK6_CH_EN
+                      {
+                          6u,
+                          TK6_THR_DATA,
+                      },
+              #endif
+ 132          
+ 133          #if TK7_CH_EN
+                      {
+                          7u,
+                          TK7_THR_DATA,
+                      },
+              #endif
+ 139          
+ 140          #if TK8_CH_EN
+                      {
+                          8u,
+                          TK8_THR_DATA,
+                      },
+              #endif
+ 146          
+ 147          #if TK9_CH_EN
+ 148                  {
+ 149                      9u,
+ 150                      TK9_THR_DATA,
+ 151                  },
+ 152          #endif
+ 153          
+ 154          #if TK10_CH_EN
+ 155                  {
+ 156                      10u,
+ 157                      TK10_THR_DATA,
+ 158                  },
+ 159          #endif
+ 160          
+ 161          #if TK11_CH_EN
+                      {
+                          11u,
+                          TK11_THR_DATA,
+                      },
+              #endif
+ 167          
+ 168          #if TK12_CH_EN
+                      {
+                          12u,
+                          TK12_THR_DATA,
+                      },
+              #endif
+ 174          
+ 175          #if TK13_CH_EN
+                      {
+                          13u,
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 4   
+
+                          TK13_THR_DATA,
+                      },
+              #endif
+ 181          
+ 182          #if TK14_CH_EN
+                      {
+                          14u,
+                          TK14_THR_DATA,
+                      },
+              #endif
+ 188          
+ 189          #if TK15_CH_EN
+                      {
+                          15u,
+                          TK15_THR_DATA,
+                      },
+              #endif
+ 195          
+ 196          #if TK16_CH_EN
+                      {
+                          16u,
+                          TK16_THR_DATA,
+                      },
+              #endif
+ 202          
+ 203          #if TK17_CH_EN
+                      {
+                          17u,
+                          TK17_THR_DATA,
+                      },
+              #endif
+ 209          
+ 210          #if TK18_CH_EN
+                      {
+                          18u,
+                          TK18_THR_DATA,
+                      },
+              #endif
+ 216          
+ 217          #if TK19_CH_EN
+                      {
+                          19u,
+                          TK19_THR_DATA,
+                      },
+              #endif
+ 223          
+ 224          #if TK20_CH_EN
+                      {
+                          20u,
+                          TK20_THR_DATA,
+                      },
+              #endif
+ 230          
+ 231          #if TK21_CH_EN
+                      {
+                          21u,
+                          TK21_THR_DATA,
+                      },
+              #endif
+ 237          
+ 238          #if TK22_CH_EN
+                      {
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 5   
+
+                          22u,
+                          TK22_THR_DATA,
+                      },
+              #endif
+ 244          
+ 245          #if TK23_CH_EN
+                      {
+                          23u,
+                          TK23_THR_DATA,
+                      },
+              #endif
+ 251          
+ 252          #if TK24_CH_EN
+ 253                  {
+ 254                      24u,
+ 255                      TK24_THR_DATA,
+ 256                  },
+ 257          #endif
+ 258          
+ 259          #if TK25_CH_EN
+                      {
+                          25u,
+                          TK25_THR_DATA,
+                      },
+              #endif
+ 265          };
+ 266          
+ 267          /**
+ 268           * @brief  Touchkey gpio init function
+ 269           * @param  None
+ 270           * @retval None
+ 271           */
+ 272          void tk_gpio_config(void)
+ 273          {
+ 274   1          u8 i = 0;
+ 275   1      
+ 276   1          for (i = 0; i < TK_CH_USE; i++)
+ 277   1          {
+ 278   2      
+ 279   2              if (__tk_ch_index[i] < 8)
+ 280   2              {
+ 281   3                  if (__tk_ch_index[i] < 4)
+ 282   3                  {
+ 283   4                      P0_MD0 &= ~(0x3 << (__tk_ch_index[i] - 0) * 2);
+ 284   4                      P0_MD0 |= (0x3 << (__tk_ch_index[i] - 0) * 2);
+ 285   4                  }
+ 286   3                  else
+ 287   3                  {
+ 288   4                      P0_MD1 &= ~(0x3 << (__tk_ch_index[i] - 4) * 2);
+ 289   4                      P0_MD1 |= (0x3 << (__tk_ch_index[i] - 4) * 2);
+ 290   4                  }
+ 291   3              }
+ 292   2              else if ((__tk_ch_index[i] >= 8) && (__tk_ch_index[i] < 16))
+ 293   2              {
+ 294   3                  if (__tk_ch_index[i] < 12)
+ 295   3                  {
+ 296   4                      P1_MD0 &= ~(0x3 << (__tk_ch_index[i] - 8) * 2);
+ 297   4                      P1_MD0 |= (0x3 << (__tk_ch_index[i] - 8) * 2);
+ 298   4                  }
+ 299   3                  else
+ 300   3                  {
+ 301   4                      P1_MD1 &= ~(0x3 << (__tk_ch_index[i] - 12) * 2);
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 6   
+
+ 302   4                      P1_MD1 |= (0x3 << (__tk_ch_index[i] - 12) * 2);
+ 303   4                  }
+ 304   3              }
+ 305   2              else
+ 306   2              {
+ 307   3                  if (__tk_ch_index[i] < 20)
+ 308   3                  {
+ 309   4                      P2_MD0 &= ~(0x3 << (__tk_ch_index[i] - 16) * 2);
+ 310   4                      P2_MD0 |= (0x3 << (__tk_ch_index[i] - 16) * 2);
+ 311   4                  }
+ 312   3                  else
+ 313   3                  {
+ 314   4                      P2_MD1 &= ~(0x3 << (__tk_ch_index[i] - 20) * 2);
+ 315   4                      P2_MD1 |= (0x3 << (__tk_ch_index[i] - 20) * 2);
+ 316   4                  }
+ 317   3              }
+ 318   2          }
+ 319   1      }
+ 320          
+ 321          /**
+ 322           * @brief  Touchkey_IRQHandler
+ 323           * @param  none
+ 324           * @retval None
+ 325           */
+ 326          void TK_IRQHandler(void) interrupt TK_IRQn
+ 327          {
+ 328   1          __IRQnIPnPush(TK_IRQn);
+ 329   1          if (TK_CON2 & (0x1 << 6))
+ 330   1          {
+ 331   2              TK_CON2 |= (0x1 << 6);
+ 332   2              __tk_handler();
+ 333   2          }
+ 334   1          __IRQnIPnPop(TK_IRQn);
+ 335   1      }
+ 336          
+ 337          /**
+ 338           * @brief  Touchkey Module init function
+ 339           * @param  None
+ 340           * @retval None
+ 341           */
+ 342          void tk_init(void)
+ 343          {
+ 344   1          IE_EA = 1;
+ 345   1          IE3 |= (0x1 << 3);
+ 346   1          IP6 |= (0x3 << 6);
+ 347   1          CLK_CON2 |= (0x1 << 6);
+ 348   1          __EnableIRQ(TK_IRQn);
+ 349   1          TK_ACON0 = 0x3F;
+ 350   1          TK_ACON1 = 0x4B;
+ 351   1          TK_ACON3 = 0x30;
+ 352   1          TK_PSRCNT = 0x2F;
+ 353   1          TK_APRECHARGE = 0x4f;
+ 354   1          TK_APREDISCH = 0x27;
+ 355   1          TK_ACONVTIME = 0xA8;
+ 356   1          TK_BASEDIV0 = 0x10;
+ 357   1          TK_BASEDIV1 = 0x0;
+ 358   1          TK_BASEDIV2 = 0x0;
+ 359   1          TK_BASEDIV3 = 0x0;
+ 360   1          TK_CHCON3 = 0xD0;
+ 361   1          TK_CON0 = 0x4;
+ 362   1          TK_CON1 = 0x1E;
+ 363   1          TK_CON2 = 0x02;
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 7   
+
+ 364   1      }
+ 365          
+ 366          /**
+ 367           * @brief  TIMR0_IRQHandler function
+ 368           * @param  None
+ 369           * @retval None
+ 370           */
+ 371          void WUT_IRQHandler(void) interrupt WUT_IRQn
+ 372          {
+ 373   1          // ½øÈëÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
+ 374   1          __IRQnIPnPush(WUT_IRQn);
+ 375   1          // ÖÜÆÚÖÐ¶Ï
+ 376   1          if (WUT_CONH & TMR_PRD_PND(0x1))
+ 377   1          {
+ 378   2              WUT_CONH |= TMR_PRD_PND(0x1); // Çå³ýpending
+ 379   2              __tk_ms_handler();            // ±ÕÔ´µÄ£¬²»ÖªµÀ×öÁËÊ²Ã´£¬¿´ÉÏÈ¥ÊÇÈÃCPU½øÈëË¯Ãß£¬µ¥Î»Îªms£¨ÊÖ²áÉÏËµ
+             -ÊÇË¯Ãß300ms£©
+ 380   2          }
+ 381   1      
+ 382   1          // ÍË³öÖÐ¶ÏÉèÖÃIP£¬²»¿ÉÉ¾³ý
+ 383   1          __IRQnIPnPop(WUT_IRQn);
+ 384   1      }
+ 385          
+ 386          #if 0
+              /**
+               * @brief  TIMER Module init function
+               * @param  None
+               * @retval None
+               */
+              void wut_init(void)
+              {
+                  __EnableIRQ(WUT_IRQn);
+                  IE_EA = 1;
+              
+                  // ÉèÖÃtimer2µÄ¼ÆÊý¹¦ÄÜ£¬ÅäÖÃÒ»¸ö10msµÄÖÐ¶Ï
+                  TMR_ALLCON = WUT_CNT_CLR(0x1);
+                  WUT_PRH = TMR_PERIOD_VAL_H((PEROID_VAL >> 8) & 0xFF);                       // timer2¼ÆÊýÖÜÆÚ¸ß8Î»
+                  WUT_PRL = TMR_PERIOD_VAL_L((PEROID_VAL >> 0) & 0xFF);                       // timer2¼ÆÊýÖÜÆÚµÍ8Î»
+                  WUT_CONH = TMR_PRD_PND(0x1) | TMR_PRD_IRQ_EN(0x1);                          // Çå³ýÖÐ¶Ï±êÖ¾Î»²¢Ê¹ÄÜÖÐ¶
+             -Ï
+                  WUT_CONL = TMR_SOURCE_SEL(0x7) | TMR_PRESCALE_SEL(0x7) | TMR_MODE_SEL(0x1); // ÅäÖÃtimer2Ê±ÖÓÔ´¡¢Ô¤·ÖÆ
+             -µÖµ¡¢Ä£Ê½
+              }
+              #endif // end void wut_init(void)
+ 405          
+ 406          /**
+ 407           * @brief  Touchkey  parameter configuration function
+ 408           *         °´¼ü²ÎÊýÅäÖÃº¯Êý
+ 409           *
+ 410           * @param  None
+ 411           * @retval None
+ 412           */
+ 413          void tk_param_init(void)
+ 414          {
+ 415   1          u8 i = 0;
+ 416   1      
+ 417   1          /* °´¼üÍ¨µÀ¡¢µçÁ÷¡¢ÁéÃô¶È³õÊ¼»¯ */
+ 418   1          for (i = 0; i < TK_CH_USE; i++)
+ 419   1          {
+ 420   2              __tk_ch_index[i] = (u8)(TK_CH_EN_BUG[i][0] & 0xff); // ´æ·Å°´¼üÍ¨µÀÐÅÏ¢
+ 421   2              __tk_ch_fth[i] = TK_CH_EN_BUG[i][1];                // ´æ·Å°´¼üÍ¨µÀÐÅÏ¢
+ 422   2              __tk_i_set[i] = TK_CURR_GEAR;                       // ³äµçµçÁ÷
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 8   
+
+ 423   2              __tk_ch_en |= (1UL << __tk_ch_index[i]);            // °´¼üÍ¨µÀÊ¹ÄÜ
+ 424   2          }
+ 425   1      
+ 426   1          /* °´¼üIOÅäÖÃº¯Êý */
+ 427   1          tk_gpio_config();
+ 428   1      
+ 429   1          /* ¿âº¯Êý³õÊ¼»¯ */
+ 430   1          __tk_lib_init(); // µ÷ÓÃÁË¿â£¨±ÕÔ´£©
+ 431   1      
+ 432   1          /* °´¼üÄ£¿éÅäÖÃº¯Êý */
+ 433   1          tk_init();
+ 434   1      
+ 435   1          /* ¶¨Ê±Æ÷ÅäÖÃº¯Êý */
+ 436   1          // wut_init();
+ 437   1      }
+ 438          
+ 439          /**
+ 440           * @brief  Touchkey  Circular execution function
+ 441           * @param  None
+ 442           * @retval None
+ 443           */
+ 444          void tk_handle(void)
+ 445          {
+ 446   1          // u32 tmp = 0; // ÁÙÊ±±äÁ¿£¬²âÊÔÓÃ
+ 447   1      
+ 448   1          /* ÓÃ»§´úÂë³õÊ¼»¯½Ó¿Ú */
+ 449   1          user_init();
+ 450   1      
+ 451   1          /* µ÷ÊÔ´®¿Ú³õÊ¼»¯ */
+ 452   1      #if TK_DEBUG_EN
+                  debug_gpio_config();
+                  debug_uart_config();
+              #endif
+ 456   1      
+ 457   1          /* °´¼ü³õÊ¼»¯ */
+ 458   1          tk_param_init();
+ 459   1      
+ 460   1          // ÉÏµçºó5ÃëÄÚ½øÐÐÑ§Ï°£¬ÎÞÂÛÓÐÃ»ÓÐÆ÷¼þÓëµ¥Æ¬»úÅä¶Ô£¬¶¼ÍË³ö
+ 461   1          rf_learn();
+ 462   1      
+ 463   1          /* ÏµÍ³Ö÷Ñ­»· */
+ 464   1          while (1)
+ 465   1          {
+ 466   2              /* °´¼üÉ¨Ãèº¯Êý */
+ 467   2              __tk_scan(); // Ê¹ÓÃÁË¿âÀïÃæµÄ½Ó¿Ú£¨±ÕÔ´¿â£©
+ 468   2      
+ 469   2              /* ÓÃ»§Ñ­»·É¨Ãèº¯Êý½Ó¿Ú */
+ 470   2              user_handle();
+ 471   2      
+ 472   2              rf_scan(); // É¨ÃèÊÇ·ñÓÐRFÐÅºÅ£¬ÒÔ¼°×öÏàÓ¦µÄ´¦Àí
+ 473   2      
+ 474   2      
+ 475   2              // show_addr_info_save_by_type();
+ 476   2              // show_addr_info_save_by_nums();
+ 477   2      
+ 478   2              // delay_ms(500);
+ 479   2      
+ 480   2              // ²âÊÔÍ¨¹ý
+ 481   2              // LED6 = 1;
+ 482   2              // delay_ms(500);
+ 483   2              // LED6 = 0;
+ 484   2              // delay_ms(500);
+C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 15:17:09 PAGE 9   
+
+ 485   2      
+ 486   2              // ²âÊÔÍ¨¹ý
+ 487   2              // LED7 = 1;
+ 488   2              // delay_ms(500);
+ 489   2              // LED7 = 0;
+ 490   2              // delay_ms(500);
+ 491   2              
+ 492   2              // P12 = ~P12;
+ 493   2      
+ 494   2              // flash_erase_sector(FLASH_DEVICE_START_ADDR);
+ 495   2              // rf_learn();
+ 496   2      
+ 497   2              // rf_recv();
+ 498   2      
+ 499   2              // rf_recv_databuf();
+ 500   2      
+ 501   2              /* µ÷ÊÔ´òÓ¡º¯Êý£¬Èç¹û²»ÐèÒª´òÓ¡ÔòÔÚtk_conf.hÖÐ½«TK_DEBUG_ENÉèÖÃÎª0 */
+ 502   2      #if TK_DEBUG_EN
+                      if ((__tk_ms_flag >= 1) && (__tk_adjust_done_peng))
+                      {
+                          __tk_ms_flag = 0;
+                          tk_debug_func();
+                      }
+              #endif
+ 509   2      
+ 510   2              /* Î¹¹· :½¨Òé²»Òª¹Ø±Õ¿´ÃÅ¹·£¬Ä¬ÈÏ2s¸´Î»*/
+ 511   2              WDT_KEY = WDT_KEY_VAL(0xAA);
+ 512   2          }
+ 513   1      }
+ 514          
+ 515          /*************************** (C) COPYRIGHT 2022 TAIXIN-IC ***** END OF FILE *****/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    934    ----
+   CONSTANT SIZE    =     46    ----
+   XDATA SIZE       =     72    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

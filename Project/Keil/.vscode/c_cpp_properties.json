@@ -1,0 +1,41 @@
+{
+    "configurations": [
+        {
+            "name": "Target 1",
+            "includePath": [
+                "d:\\项目资料\\G——冠之欧\\3D07雾化壁炉\\code\\ZD0413-240312-DP001-1（3260）\\Libraries\\Include",
+                "d:\\项目资料\\G——冠之欧\\3D07雾化壁炉\\code\\ZD0413-240312-DP001-1（3260）\\User",
+                "d:\\项目资料\\G——冠之欧\\3D07雾化壁炉\\code\\ZD0413-240312-DP001-1（3260）\\User\\lib",
+                "D:\\C51\\C51\\INC",
+                "d:\\项目资料\\G——冠之欧\\3D07雾化壁炉\\code\\ZD0413-240312-DP001-1（3260）\\Libraries\\Startup",
+                "d:\\项目资料\\G——冠之欧\\3D07雾化壁炉\\code\\ZD0413-240312-DP001-1（3260）\\Libraries\\Source"
+            ],
+            "defines": [
+                "__C51__",
+                "__VSCODE_C51__",
+                "reentrant=",
+                "compact=",
+                "small=",
+                "large=",
+                "data=",
+                "idata=",
+                "pdata=",
+                "bdata=",
+                "xdata=",
+                "code=",
+                "bit=char",
+                "sbit=char",
+                "sfr=char",
+                "sfr16=int",
+                "sfr32=int",
+                "interrupt=",
+                "using=",
+                "_at_=",
+                "_priority_=",
+                "_task_="
+            ],
+            "intelliSenseMode": "${default}"
+        }
+    ],
+    "version": 4
+}

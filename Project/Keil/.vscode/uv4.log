@@ -1,0 +1,6 @@
+Load "d:\\项目资料\\G——冠之欧\\3D07雾化壁炉\\code\\ZD0413-240312-DP001-1（3260）\\Project\\Keil\\Release\\Objects\\Demo" 
+Flash Erase Done.
+Flash Write Done: 13957 bytes programmed.
+*** Error 0x00000006: VerifyFlash Failed at 0000.
+Error: Flash Download failed  -  
+Flash Load finished at 10:46:01

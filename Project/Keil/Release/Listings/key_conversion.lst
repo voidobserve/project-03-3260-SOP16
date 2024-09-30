@@ -1,0 +1,144 @@
+C51 COMPILER V9.60.7.0   KEY_CONVERSION                                                    09/30/2024 15:17:10 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE KEY_CONVERSION
+OBJECT MODULE PLACED IN .\Release\Objects\key_conversion.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\key_conversion.c LARGE OPTIMIZE(8,SPEED) BROWSE INTVECTOR(0X0
+                    -00C) INCDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\k
+                    -ey_conversion.lst) OBJECT(.\Release\Objects\key_conversion.obj)
+
+line level    source
+
+   1          // 将遥控器按键的键值转换成唯一的功能值的源文件
+   2          #include "key_conversion.h"
+   3          #include "rf_learn.h"
+   4          
+   5          // 根据器件地址和键值，转换成键值对应的功能值
+   6          u8 key_to_funval(u16 addr, u8 key)
+   7          {
+   8   1          u8 funval = 0x00;
+   9   1          u8 remote_type = 0x55; // 存放遥控器类型的变量
+  10   1      
+  11   1          u8 i = 0;
+  12   1          for (i = 0; i < ADDR_MAX_NUM; i++) // 根据地址，找到其对应的遥控器类型
+  13   1          {
+  14   2              if (addr_info.addr_buf[i] == addr)
+  15   2              {
+  16   3                  remote_type = addr_info.remote_type[i];
+  17   3                  break;
+  18   3              }
+  19   2          }
+  20   1      
+  21   1          if (REMOTE_TYPE_SMALL_RM == remote_type)
+  22   1          {
+  23   2              // 如果是小遥控器
+  24   2              // 根据它的键值来做转换
+  25   2              switch (key)
+  26   2              {
+  27   3              case KEY_SMALL_RM_1: // 按键--上
+  28   3                  funval = KEY_FUNCTION_UP;
+  29   3                  break;
+  30   3              case KEY_SMALL_RM_2: // 按键--左
+  31   3                  funval = KEY_FUNCTION_LEFT;
+  32   3                  break;
+  33   3              case KEY_SMALL_RM_3: // 按键--电源
+  34   3                  funval = KEY_FUNCTION_POWER;
+  35   3                  break;
+  36   3              case KEY_SMALL_RM_4: // 按键--右
+  37   3                  funval = KEY_FUNCTION_RIGHT;
+  38   3                  break;
+  39   3              case KEY_SMALL_RM_5: // 按键--下
+  40   3                  funval = KEY_FUNCTION_DOWN;
+  41   3                  break;
+  42   3              case KEY_SMALL_RM_6: // 按键--灯光、亮度
+  43   3                  funval = KEY_FUNCTION_LIGHT;
+  44   3                  break;
+  45   3              case KEY_SMALL_RM_7: // 按键--音乐，按钮上是个音乐图标
+  46   3                  funval = KEY_FUNCTION_MUSIC_ICON;
+  47   3                  break;
+  48   3              case KEY_SMALL_RM_8: // 按键--自动
+  49   3                  funval = KEY_FUNCTION_AUTO;
+  50   3                  break;
+  51   3              case KEY_SMALL_RM_9: // 按键--列表
+  52   3                  funval = KEY_FUNCTION_LIST;
+  53   3                  break;
+C51 COMPILER V9.60.7.0   KEY_CONVERSION                                                    09/30/2024 15:17:10 PAGE 2   
+
+  54   3              case KEY_SMALL_RM_10: // 按键--RAINBOW，按钮上就是这个字样
+  55   3                  funval = KEY_FUNCTION_RAINBOW;
+  56   3                  break;
+  57   3              }
+  58   2          }
+  59   1          else if (REMOTE_TYPE_BIG_RM == remote_type)
+  60   1          {
+  61   2              switch (key)
+  62   2              {
+  63   3              case KEY_BIG_RM_1: // 按键--电源
+  64   3                  funval = KEY_FUNCTION_POWER;
+  65   3                  break;
+  66   3              case KEY_BIG_RM_2: // 按键--静音
+  67   3                  funval = KEY_FUNCTION_MUTE;
+  68   3                  break;
+  69   3              case KEY_BIG_RM_3: // 按键--上
+  70   3                  funval = KEY_FUNCTION_UP;
+  71   3                  break;
+  72   3              case KEY_BIG_RM_4: // 按键--左
+  73   3                  funval = KEY_FUNCTION_LEFT;
+  74   3                  break;
+  75   3              case KEY_BIG_RM_5: // 按键--播放暂停
+  76   3                  funval = KEY_FUNCTION_PLAY_PAUSE;
+  77   3                  break;
+  78   3              case KEY_BIG_RM_6: // 按键--右
+  79   3                  funval = KEY_FUNCTION_RIGHT;
+  80   3                  break;
+  81   3              case KEY_BIG_RM_7: // 按键--下
+  82   3                  funval = KEY_FUNCTION_DOWN;
+  83   3                  break;
+  84   3              case KEY_BIG_RM_8: // 按键--音乐，按钮上是个MUSIC字样
+  85   3                  funval = KEY_FUNCTION_MUSIC_FONT;
+  86   3                  break;
+  87   3              case KEY_BIG_RM_9: // 按键--模式
+  88   3                  funval = KEY_FUNCTION_MODE;
+  89   3                  break;
+  90   3              case KEY_BIG_RM_10: // 按键--影视，按钮上是MOVIE字样
+  91   3                  funval = KEY_FUNCTION_MOVIE;
+  92   3                  break;
+  93   3              case KEY_BIG_RM_11: // 按键--TREB+，高音+
+  94   3                  funval = KEY_FUNCTION_TREB_ADD;
+  95   3                  break;
+  96   3              case KEY_BIG_RM_12: // 按键--新闻，NEWS
+  97   3                  funval = KEY_FUNCTION_NEWS;
+  98   3                  break;
+  99   3              case KEY_BIG_RM_13: // 按键--低音+，BASS+
+ 100   3                  funval = KEY_FUNCTION_BASS_ADD;
+ 101   3                  break;
+ 102   3              case KEY_BIG_RM_14: // 按键--高音-，TREB-
+ 103   3                  funval = KEY_FUNCTION_TREB_SUB;
+ 104   3                  break;
+ 105   3              case KEY_BIG_RM_15: // 按键--显示，DISPLAY
+ 106   3                  funval = KEY_FUNCTION_DISPLAY;
+ 107   3                  break;
+ 108   3              case KEY_BIG_RM_16: // 按键--低音-，BASS--
+ 109   3                  funval = KEY_FUNCTION_BASS_SUB;
+ 110   3                  break;
+ 111   3              }
+ 112   2          }
+ 113   1      
+ 114   1          return funval;
+ 115   1      }
+C51 COMPILER V9.60.7.0   KEY_CONVERSION                                                    09/30/2024 15:17:10 PAGE 3   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    441    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
