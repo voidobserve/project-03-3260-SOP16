@@ -9,6 +9,12 @@
 // CIRCUIT_BOARD -- 电路板
 #define                             CIRCUIT_BOARD
 
+#define USE_MY_DEBUG 0
+
+#if USE_MY_DEBUG
+#include <stdio.h>
+#endif
+
 // ============================================================
 // 如果需要修改使用的触摸按键数量和位置，需要去tk_config.h中修改
 // 并在tk_user.c中添加/修改对应的功能

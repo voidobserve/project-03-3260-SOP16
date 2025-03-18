@@ -70,6 +70,7 @@ void debug_gpio_config(void)
 }
 #endif
 
+#if 0
 /**
  * @brief  LED INIT FUNCTION
  * @param  None
@@ -147,6 +148,11 @@ void led_init(void)
     led_data[0] = 0x00000f00; // 一开始让四个LED全部点亮
     // led_data[0] = 0x00000000; // 一开始让四个LED全部熄灭
 }
+#endif
+
+#if USE_MY_DEBUG
+extern void uart1_config(void);
+#endif // #if USE_MY_DEBUG
 
 /**
  * @brief  用户代码初始化函数接口.
@@ -173,12 +179,16 @@ void user_init(void)
 
     // p01_output_config(); // 开发板LED6对应的引脚初始化
     // p26_output_config(); // 开发板LED7对应的引脚初始化
+
+#if USE_MY_DEBUG
+    uart1_config();
+#endif //     #if USE_MY_DEBUG
 }
 
-void led_display(void)
-{
-    led_data[0] = display_data;
-}
+// void led_display(void)
+// {
+// led_data[0] = display_data;
+// }
 
 #ifdef DEVELOPMENT_BOARD // 开发板上对应额触摸按键函数接口
 /**
@@ -254,7 +264,7 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
@@ -282,12 +292,12 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
-                        
+
                         send_status_keyval(KEY_PRESS_DOUBLECLICK, KEY_TK2);
                         return;
                     }
@@ -310,7 +320,7 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
@@ -338,7 +348,7 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
@@ -523,7 +533,6 @@ void user_handle(void)
  * @retval None
  */
 
-
 #define send_sp (100)
 void user_handle(void)
 {
@@ -592,19 +601,27 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
+                            WDT_KEY = WDT_KEY_VAL(0xAA);
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
 
                         send_status_keyval(KEY_PRESS_DOUBLECLICK, KEY_TK1);
+
+#if USE_MY_DEBUG
+                        printf("K1 double press\n");
+#endif
                         return;
                     }
                 }
 
                 // 如果不是同一个按键按下或是没有值，说明是短按
                 send_status_keyval(KEY_PRESS_SHORT, KEY_TK1); // 发送带有状态的键值
+#if USE_MY_DEBUG
+                printf("K1 press\n");
+#endif
             }
             else if (TK_CH3_VALIB == KeyOnOutput)
             {
@@ -619,19 +636,26 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
+                            WDT_KEY = WDT_KEY_VAL(0xAA);
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
 
                         send_status_keyval(KEY_PRESS_DOUBLECLICK, KEY_TK2);
+#if USE_MY_DEBUG
+                        printf("K2 double press\n");
+#endif
                         return;
                     }
                 }
 
                 // 如果不是同一个按键按下或是没有值，说明是短按
                 send_status_keyval(KEY_PRESS_SHORT, KEY_TK2); // 发送带有状态的键值
+#if USE_MY_DEBUG
+                printf("K2 press\n");
+#endif
             }
             else if (TK_CH2_VALIB == KeyOnOutput)
             {
@@ -646,19 +670,26 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
+                            WDT_KEY = WDT_KEY_VAL(0xAA);
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
 
                         send_status_keyval(KEY_PRESS_DOUBLECLICK, KEY_TK3);
+#if USE_MY_DEBUG
+                        printf("K3 double press\n");
+#endif
                         return;
                     }
                 }
 
                 // 如果不是同一个按键按下或是没有值，说明是短按
                 send_status_keyval(KEY_PRESS_SHORT, KEY_TK3); // 发送带有状态的键值
+#if USE_MY_DEBUG
+                printf("K3 press\n");
+#endif
             }
             else if (TK_CH0_VALIB == KeyOnOutput)
             {
@@ -673,19 +704,26 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
+                            WDT_KEY = WDT_KEY_VAL(0xAA);
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
 
                         send_status_keyval(KEY_PRESS_DOUBLECLICK, KEY_TK4);
+#if USE_MY_DEBUG
+                        printf("K4 double press\n");
+#endif
                         return;
                     }
                 }
 
                 // 如果不是同一个按键按下或是没有值，说明是短按
                 send_status_keyval(KEY_PRESS_SHORT, KEY_TK4); // 发送带有状态的键值
+#if USE_MY_DEBUG
+                printf("K4 press\n");
+#endif
             }
             else if (TK_CH9_VALIB == KeyOnOutput)
             {
@@ -700,19 +738,26 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
+                            WDT_KEY = WDT_KEY_VAL(0xAA);
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
 
                         send_status_keyval(KEY_PRESS_DOUBLECLICK, KEY_TK5);
+#if USE_MY_DEBUG
+                        printf("K5 double press\n");
+#endif
                         return;
                     }
                 }
 
                 // 如果不是同一个按键按下或是没有值，说明是短按
                 send_status_keyval(KEY_PRESS_SHORT, KEY_TK5); // 发送带有状态的键值
+#if USE_MY_DEBUG
+                printf("K5 press\n");
+#endif
             }
             else if (TK_CH10_VALIB == KeyOnOutput)
             {
@@ -727,19 +772,26 @@ void user_handle(void)
                     {
                         // 如果检测到是同一个按键按下，说明是双击
                         // 等待手指松开按键，不然发送完带有双击状态的键值后会再发送一次单击状态的键值
-                        while (0 != KeyOnOutput) 
+                        while (0 != KeyOnOutput)
                         {
+                            WDT_KEY = WDT_KEY_VAL(0xAA);
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
 
                         send_status_keyval(KEY_PRESS_DOUBLECLICK, KEY_TK6);
+#if USE_MY_DEBUG
+                        printf("K6 double press\n");
+#endif
                         return;
                     }
                 }
 
                 // 如果不是同一个按键按下或是没有值，说明是短按
                 send_status_keyval(KEY_PRESS_SHORT, KEY_TK6); // 发送带有状态的键值
+#if USE_MY_DEBUG
+                printf("K6 press\n");
+#endif
             }
         }
     }
@@ -756,6 +808,9 @@ void user_handle(void)
             if (cnt >= TK_LONG_KEY_TIME && cnt < 90)
             {
                 send_status_keyval(KEY_PRESS_LONG, KEY_TK1);
+#if USE_MY_DEBUG
+                printf("K1 long\n");
+#endif
             }
 
             // 若还不松开手，则每隔150ms发送一次带有持续状态信息的键值信号
@@ -770,6 +825,9 @@ void user_handle(void)
                 {
                     cnt = TK_LONG_KEY_TIME;
                     send_status_keyval(KEY_PRESS_CONTINUE, KEY_TK1);
+#if USE_MY_DEBUG
+                    printf("K1 hold\n");
+#endif
                 }
             }
         }
@@ -779,6 +837,9 @@ void user_handle(void)
             if (cnt >= TK_LONG_KEY_TIME && cnt < 90)
             {
                 send_status_keyval(KEY_PRESS_LONG, KEY_TK2);
+#if USE_MY_DEBUG
+                printf("K2 long\n");
+#endif
             }
 
             // 若还不松开手，则每隔150ms发送一次带有持续状态信息的键值信号
@@ -793,6 +854,9 @@ void user_handle(void)
                 {
                     cnt = TK_LONG_KEY_TIME;
                     send_status_keyval(KEY_PRESS_CONTINUE, KEY_TK2);
+#if USE_MY_DEBUG
+                    printf("K2 hold\n");
+#endif
                 }
             }
 
@@ -807,6 +871,9 @@ void user_handle(void)
                 // display_data ^= 0x0400; // 对应的LED状态取反，后面会调用led_display()刷新
                 // led_display();          // LED状态更新显示
                 send_status_keyval(KEY_PRESS_LONG, KEY_TK3);
+#if USE_MY_DEBUG
+                printf("K3 long\n");
+#endif
             }
 
             // 若还不松开手，则每隔150ms发送一次带有持续状态信息的键值信号
@@ -821,6 +888,9 @@ void user_handle(void)
                 {
                     cnt = TK_LONG_KEY_TIME;
                     send_status_keyval(KEY_PRESS_CONTINUE, KEY_TK3);
+#if USE_MY_DEBUG
+                    printf("K3 hold\n");
+#endif
                 }
             }
 
@@ -835,6 +905,9 @@ void user_handle(void)
                 // display_data ^= 0x0800; // 对应的LED状态取反，后面会调用led_display()刷新
                 // led_display();          // LED状态更新显示
                 send_status_keyval(KEY_PRESS_LONG, KEY_TK4);
+#if USE_MY_DEBUG
+                printf("K4 long\n");
+#endif
             }
 
             // 若还不松开手，则每隔150ms发送一次带有持续状态信息的键值信号
@@ -849,6 +922,9 @@ void user_handle(void)
                 {
                     cnt = TK_LONG_KEY_TIME;
                     send_status_keyval(KEY_PRESS_CONTINUE, KEY_TK4);
+#if USE_MY_DEBUG
+                    printf("K4 hold\n");
+#endif
                 }
             }
 
@@ -863,6 +939,9 @@ void user_handle(void)
                 // display_data ^= 0x0800; // 对应的LED状态取反，后面会调用led_display()刷新
                 // led_display();          // LED状态更新显示
                 send_status_keyval(KEY_PRESS_LONG, KEY_TK5);
+#if USE_MY_DEBUG
+                printf("K5 long\n");
+#endif
             }
 
             // 若还不松开手，则每隔150ms发送一次带有持续状态信息的键值信号
@@ -877,6 +956,9 @@ void user_handle(void)
                 {
                     cnt = TK_LONG_KEY_TIME;
                     send_status_keyval(KEY_PRESS_CONTINUE, KEY_TK5);
+#if USE_MY_DEBUG
+                    printf("K5 hold\n");
+#endif
                 }
             }
 
@@ -892,6 +974,9 @@ void user_handle(void)
                 // display_data ^= 0x0800; // 对应的LED状态取反，后面会调用led_display()刷新
                 // led_display();          // LED状态更新显示
                 send_status_keyval(KEY_PRESS_LONG, KEY_TK6);
+#if USE_MY_DEBUG
+                printf("K6 long\n");
+#endif
             }
 
             // 若还不松开手，则每隔150ms发送一次带有持续状态信息的键值信号
@@ -906,6 +991,9 @@ void user_handle(void)
                 {
                     cnt = TK_LONG_KEY_TIME;
                     send_status_keyval(KEY_PRESS_CONTINUE, KEY_TK6);
+#if USE_MY_DEBUG
+                    printf("K6 hold\n");
+#endif
                 }
             }
 
@@ -920,26 +1008,44 @@ void user_handle(void)
         {
         case TK_CH24_VALIB:
             send_status_keyval(KEY_PRESS_LOOSE, KEY_TK1);
+#if USE_MY_DEBUG
+            printf("K1 loose\n");
+#endif
             break;
 
         case TK_CH3_VALIB:
             send_status_keyval(KEY_PRESS_LOOSE, KEY_TK2);
+#if USE_MY_DEBUG
+            printf("K2 loose\n");
+#endif
             break;
 
         case TK_CH2_VALIB:
             send_status_keyval(KEY_PRESS_LOOSE, KEY_TK3);
+#if USE_MY_DEBUG
+            printf("K3 loose\n");
+#endif
             break;
 
         case TK_CH0_VALIB:
             send_status_keyval(KEY_PRESS_LOOSE, KEY_TK4);
+#if USE_MY_DEBUG
+            printf("K4 loose\n");
+#endif
             break;
 
         case TK_CH9_VALIB:
             send_status_keyval(KEY_PRESS_LOOSE, KEY_TK5);
+#if USE_MY_DEBUG
+            printf("K5 loose\n");
+#endif
             break;
 
         case TK_CH10_VALIB:
             send_status_keyval(KEY_PRESS_LOOSE, KEY_TK6);
+#if USE_MY_DEBUG
+            printf("K6 loose\n");
+#endif
             break;
         }
 

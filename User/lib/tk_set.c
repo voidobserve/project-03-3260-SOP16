@@ -25,7 +25,7 @@
 
 #include "flash.h" // 单片机的flash操作，测试用
 
-#include "tmr3.h" 
+#include "tmr3.h"
 
 #include "rf_scan.h"
 
@@ -460,6 +460,10 @@ void tk_handle(void)
     // 上电后5秒内进行学习，无论有没有器件与单片机配对，都退出
     rf_learn();
 
+#if USE_MY_DEBUG
+    printf("sys reset\n"); // 表示系统刚上电 / 被复位
+#endif //   #if USE_MY_DEBUG
+
     /* 系统主循环 */
     while (1)
     {
@@ -470,7 +474,6 @@ void tk_handle(void)
         user_handle();
 
         rf_scan(); // 扫描是否有RF信号，以及做相应的处理
-
 
         // show_addr_info_save_by_type();
         // show_addr_info_save_by_nums();
@@ -488,7 +491,7 @@ void tk_handle(void)
         // delay_ms(500);
         // LED7 = 0;
         // delay_ms(500);
-        
+
         // P12 = ~P12;
 
         // flash_erase_sector(FLASH_DEVICE_START_ADDR);
@@ -505,10 +508,10 @@ void tk_handle(void)
             __tk_ms_flag = 0;
             tk_debug_func();
         }
-#endif
+#endif  
 
         /* 喂狗 :建议不要关闭看门狗，默认2s复位*/
-        WDT_KEY = WDT_KEY_VAL(0xAA);
+        WDT_KEY = WDT_KEY_VAL(0xAA); 
     }
 }
 

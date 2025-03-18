@@ -1,11 +1,11 @@
-C51 COMPILER V9.60.7.0   RF_SCAN                                                           09/30/2024 16:17:08 PAGE 1   
+C51 COMPILER V9.60.7.0   RF_SCAN                                                           03/18/2025 09:10:53 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE RF_SCAN
 OBJECT MODULE PLACED IN .\Release\Objects\rf_scan.obj
-COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\rf_scan.c LARGE OPTIMIZE(8,SPEED) BROWSE INTVECTOR(0X000C) IN
-                    -CDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\rf_scan.
-                    -lst) OBJECT(.\Release\Objects\rf_scan.obj)
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\rf_scan.c LARGE OPTIMIZE(9,SIZE) BROWSE INTVECTOR(0X000C) INC
+                    -DIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\rf_scan.l
+                    -st) OBJECT(.\Release\Objects\rf_scan.obj)
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   51   3      #endif // end ifdef CIRCUIT_BOARD
   52   3      
   53   3                  tmr3_enable(); // 打开定时器，开始计数
-C51 COMPILER V9.60.7.0   RF_SCAN                                                           09/30/2024 16:17:08 PAGE 2   
+C51 COMPILER V9.60.7.0   RF_SCAN                                                           03/18/2025 09:10:53 PAGE 2   
 
   54   3              }
   55   2          }
@@ -126,7 +126,7 @@ line level    source
  113   5                          {
  114   6                              // 如果两次按下的键值不相等，说明不是双击
  115   6                              // 这里不清除标志位，可以留到下一次扫描
-C51 COMPILER V9.60.7.0   RF_SCAN                                                           09/30/2024 16:17:08 PAGE 3   
+C51 COMPILER V9.60.7.0   RF_SCAN                                                           03/18/2025 09:10:53 PAGE 3   
 
  116   6                              send_status_keyval(KEY_PRESS_SHORT, old_key);
  117   6                              key = 0;
@@ -190,7 +190,7 @@ line level    source
  175   3                  // 一个信号持续时间是40ms左右，这里放宽了判断条件）
  176   3                  recv_rf_flag = 0;
  177   3      
-C51 COMPILER V9.60.7.0   RF_SCAN                                                           09/30/2024 16:17:08 PAGE 4   
+C51 COMPILER V9.60.7.0   RF_SCAN                                                           03/18/2025 09:10:53 PAGE 4   
 
  178   3                  if (1 == rf_addr_isMatch())
  179   3                  {
@@ -238,7 +238,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1048    ----
+   CODE SIZE        =    680    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      7    ----
    PDATA SIZE       =   ----    ----

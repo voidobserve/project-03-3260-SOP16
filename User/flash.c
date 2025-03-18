@@ -16,7 +16,9 @@ void flash_erase_sector(u8 addr)
     FLASH_CON = FLASH_SER_TRG(0x1);        // 触发扇区擦除
 
     while (!(FLASH_STA & FLASH_SER_FLG(0x1)))
-        ; // 等待扇区擦除空闲
+    {
+        WDT_KEY = WDT_KEY_VAL(0xAA);
+    }; // 等待扇区擦除空闲
 }
 
 /**
@@ -34,7 +36,9 @@ void flash_write(u8 addr, u8 *p_data, u8 len)
     while (len >= 1)
     {
         while (!(FLASH_STA & FLASH_PROG_FLG(0x1)))
-            ; // 等待烧录空闲
+        {
+            WDT_KEY = WDT_KEY_VAL(0xAA);
+        }; // 等待烧录空闲
         FLASH_DATA = *(p_data++);
         FLASH_PASSWORD = FLASH_PASSWORD(0xB9); // 写入操作密码
         FLASH_CON = FLASH_PROG_TRG(0x1);       // 触发烧录
@@ -56,9 +60,9 @@ void flash_read(u8 addr, u8 *p_data, u8 len)
     {
         *(p_data++) = *((u8 code *)(0x3F00 + addr++));
         len--;
+        WDT_KEY = WDT_KEY_VAL(0xAA);
     }
 }
-
 
 // 测试函数，测试能够实现flash的读写
 // 使用前需要先初始化P12
@@ -66,7 +70,7 @@ void flash_test(void)
 {
     unsigned int device_addr = 0x12345678;
     unsigned int buf = 0;
-    
+
     flash_erase_sector(0x00);
     // 写入数据
     flash_write(0x00, (unsigned char *)&device_addr, sizeof(device_addr));

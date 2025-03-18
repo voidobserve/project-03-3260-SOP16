@@ -1,11 +1,11 @@
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 1   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          03/18/2025 09:10:52 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SEND_KEY
 OBJECT MODULE PLACED IN .\Release\Objects\send_key.obj
-COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\send_key.c LARGE OPTIMIZE(8,SPEED) BROWSE INTVECTOR(0X000C) I
-                    -NCDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\send_ke
-                    -y.lst) OBJECT(.\Release\Objects\send_key.obj)
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\send_key.c LARGE OPTIMIZE(9,SIZE) BROWSE INTVECTOR(0X000C) IN
+                    -CDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\send_key
+                    -.lst) OBJECT(.\Release\Objects\send_key.obj)
 
 line level    source
 
@@ -38,8 +38,8 @@ line level    source
   27   1      #ifdef CIRCUIT_BOARD
   28   1      
   29   1          P3_MD0 &= ~(GPIO_P31_MODE_SEL(0x1)); // 对应的寄存器先清零
-  30   1          P3_MD0 |=   GPIO_P31_MODE_SEL(0x1);    // P2_1配置为输出模式
-  31   1       
+  30   1          P3_MD0 |= GPIO_P31_MODE_SEL(0x1);    // P2_1配置为输出模式
+  31   1      
   32   1          P3_PU |= GPIO_P31_PULL_UP(0x01); // 内部的上拉电阻
   33   1      
   34   1          FOUT_S31 = GPIO_FOUT_AF_FUNC; // 选择AF功能输出（看手册上是数字复用功能输出，是输出逻辑高低电平用的）
@@ -62,7 +62,7 @@ line level    source
              -625us计数一次
   51   1          TMR1_CONL &= ~TMR_MODE_SEL(0x03);     // 清除TMR1的模式配置寄存器
   52   1          TMR1_CONL |= TMR_MODE_SEL(0x01);      // 配置TMR1的模式为计数器模式，最后对HIRC的脉冲进行计数
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 2   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          03/18/2025 09:10:52 PAGE 2   
 
   53   1      
   54   1          TMR1_CONH &= ~TMR_PRD_PND(0x01); // 清除TMR1的计数标志位，表示未完成计数
@@ -126,7 +126,7 @@ line level    source
  112   1          __IRQnIPnPush(TMR1_IRQn);
  113   1      
  114   1          // ---------------- 用户函数处理 -------------------
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 3   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          03/18/2025 09:10:52 PAGE 3   
 
  115   1          // 周期中断
  116   1          if (TMR1_CONH & TMR_PRD_PND(0x1))
@@ -190,7 +190,7 @@ line level    source
  173   5                      }
  174   4                  }
  175   3      
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 4   
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          03/18/2025 09:10:52 PAGE 4   
 
  176   3                  // 发送完一个周期后，对应的计数值加一
  177   3                  cur_period++;
@@ -247,15 +247,17 @@ line level    source
  228   1          tmr1_enable(); // 打开定时器，发送键值数据
  229   1          send_keyval_flag = 1;
  230   1          while (send_keyval_flag != 0) // 等待发送完成
- 231   1              ;
- 232   1          tmr1_disable(); // 关闭定时器
- 233   1      
- 234   1          delay_ms(10); // 每个键值至少间隔10ms（要求是5~10ms）
+ 231   1          {
+ 232   2              WDT_KEY = WDT_KEY_VAL(0xAA);
+ 233   2          };
+ 234   1          tmr1_disable(); // 关闭定时器
  235   1      
- 236   1      #if 0
-                  tmr2_enable();       // 打开定时器TMR2，这里通过复用定时器来实现延时10ms
-C51 COMPILER V9.60.7.0   SEND_KEY                                                          09/30/2024 16:17:08 PAGE 5   
+ 236   1          delay_ms(10); // 每个键值至少间隔10ms（要求是5~10ms）
+ 237   1      
+C51 COMPILER V9.60.7.0   SEND_KEY                                                          03/18/2025 09:10:52 PAGE 5   
 
+ 238   1      #if 0
+                  tmr2_enable();       // 打开定时器TMR2，这里通过复用定时器来实现延时10ms
                   while (tmr2_cnt < 2) // TMR2开启5ms后才会将这个计数值加一
                   {
                       WDT_KEY = WDT_KEY_VAL(0xAA); // 喂狗
@@ -264,29 +266,29 @@ line level    source
                   tmr2_flag = 0;  // 清除标志位
                   tmr2_cnt = 0;   // tmr2_cnt = 0; // 清除定时器的计数值
               #endif
- 246   1      }
- 247          
- 248          // 发送带有按键状态信息的16位数据
- 249          // 前三位信息表示短按、长按、持续和长按后松开（相关定义在rf_scan.h中）
- 250          // 后五位信息表示键值
- 251          void send_status_keyval(u8 status, u8 key)
- 252          {
- 253   1          u16 send_data = 0;
- 254   1      
- 255   1          // if (0 == key)
- 256   1          // {
- 257   1          //     return; // 不发送空的键值
- 258   1          // }
- 259   1      
- 260   1          send_data = status << (5 + 8);  // 长短按信息（3bits）
- 261   1          send_data |= (key & 0x1F) << 8; // 存放5位的键值
- 262   1          send_data |= (~send_data >> 8); // 低8位存放反码
- 263   1          send_keyval(send_data);
- 264   1      }
+ 248   1      }
+ 249          
+ 250          // 发送带有按键状态信息的16位数据
+ 251          // 前三位信息表示短按、长按、持续和长按后松开（相关定义在rf_scan.h中）
+ 252          // 后五位信息表示键值
+ 253          void send_status_keyval(u8 status, u8 key)
+ 254          {
+ 255   1          u16 send_data = 0;
+ 256   1      
+ 257   1          // if (0 == key)
+ 258   1          // {
+ 259   1          //     return; // 不发送空的键值
+ 260   1          // }
+ 261   1      
+ 262   1          send_data = status << (5 + 8);  // 长短按信息（3bits）
+ 263   1          send_data |= (key & 0x1F) << 8; // 存放5位的键值
+ 264   1          send_data |= (~send_data >> 8); // 低8位存放反码
+ 265   1          send_keyval(send_data);
+ 266   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    470    ----
+   CODE SIZE        =    463    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =      6    ----
    PDATA SIZE       =   ----    ----

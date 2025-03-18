@@ -27,8 +27,8 @@ void send_keyval_pin_init(void)
 #ifdef CIRCUIT_BOARD
 
     P3_MD0 &= ~(GPIO_P31_MODE_SEL(0x1)); // 对应的寄存器先清零
-    P3_MD0 |=   GPIO_P31_MODE_SEL(0x1);    // P2_1配置为输出模式
- 
+    P3_MD0 |= GPIO_P31_MODE_SEL(0x1);    // P2_1配置为输出模式
+
     P3_PU |= GPIO_P31_PULL_UP(0x01); // 内部的上拉电阻
 
     FOUT_S31 = GPIO_FOUT_AF_FUNC; // 选择AF功能输出（看手册上是数字复用功能输出，是输出逻辑高低电平用的）
@@ -228,7 +228,9 @@ void send_keyval(unsigned short send_data)
     tmr1_enable(); // 打开定时器，发送键值数据
     send_keyval_flag = 1;
     while (send_keyval_flag != 0) // 等待发送完成
-        ;
+    {
+        WDT_KEY = WDT_KEY_VAL(0xAA);
+    };
     tmr1_disable(); // 关闭定时器
 
     delay_ms(10); // 每个键值至少间隔10ms（要求是5~10ms）

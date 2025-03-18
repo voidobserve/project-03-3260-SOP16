@@ -1,11 +1,11 @@
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 1   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TK_SET
 OBJECT MODULE PLACED IN .\Release\Objects\tk_set.obj
-COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\lib\tk_set.c LARGE OPTIMIZE(8,SPEED) BROWSE INTVECTOR(0X000C)
-                    - INCDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\tk_se
-                    -t.lst) OBJECT(.\Release\Objects\tk_set.obj)
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\lib\tk_set.c LARGE OPTIMIZE(9,SIZE) BROWSE INTVECTOR(0X000C) 
+                    -INCDIR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\tk_set
+                    -.lst) OBJECT(.\Release\Objects\tk_set.obj)
 
 line level    source
 
@@ -36,7 +36,7 @@ line level    source
   25          
   26          #include "flash.h" // 单片机的flash操作，测试用
   27          
-  28          #include "tmr3.h" 
+  28          #include "tmr3.h"
   29          
   30          #include "rf_scan.h"
   31          
@@ -62,7 +62,7 @@ line level    source
   51          volatile unsigned short xdata __tk_ch_data_3[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 8);
   52          volatile unsigned short xdata __tk_ch_data_4[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 10);
   53          volatile unsigned short xdata __tk_ch_data_5[TK_CH_USE];
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 2   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 2   
 
   54          volatile unsigned short xdata __tk_ch_data_6[TK_CH_USE];
   55          volatile unsigned short xdata __tk_ch_fth[TK_CH_USE];
@@ -126,7 +126,7 @@ line level    source
                       {
                           4u,
                           TK4_THR_DATA,
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 3   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 3   
 
                       },
               #endif
@@ -190,7 +190,7 @@ line level    source
  175          #if TK13_CH_EN
                       {
                           13u,
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 4   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 4   
 
                           TK13_THR_DATA,
                       },
@@ -254,7 +254,7 @@ line level    source
  237          
  238          #if TK22_CH_EN
                       {
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 5   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 5   
 
                           22u,
                           TK22_THR_DATA,
@@ -318,7 +318,7 @@ line level    source
  299   3                  else
  300   3                  {
  301   4                      P1_MD1 &= ~(0x3 << (__tk_ch_index[i] - 12) * 2);
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 6   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 6   
 
  302   4                      P1_MD1 |= (0x3 << (__tk_ch_index[i] - 12) * 2);
  303   4                  }
@@ -382,7 +382,7 @@ line level    source
  361   1          TK_CON0 = 0x4;
  362   1          TK_CON1 = 0x1E;
  363   1          TK_CON2 = 0x02;
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 7   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 7   
 
  364   1      }
  365          
@@ -446,7 +446,7 @@ line level    source
  420   2              __tk_ch_index[i] = (u8)(TK_CH_EN_BUG[i][0] & 0xff); // 存放按键通道信息
  421   2              __tk_ch_fth[i] = TK_CH_EN_BUG[i][1];                // 存放按键通道信息
  422   2              __tk_i_set[i] = TK_CURR_GEAR;                       // 充电电流
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 8   
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 8   
 
  423   2              __tk_ch_en |= (1UL << __tk_ch_index[i]);            // 按键通道使能
  424   2          }
@@ -488,65 +488,68 @@ line level    source
  460   1          // 上电后5秒内进行学习，无论有没有器件与单片机配对，都退出
  461   1          rf_learn();
  462   1      
- 463   1          /* 系统主循环 */
- 464   1          while (1)
- 465   1          {
- 466   2              /* 按键扫描函数 */
- 467   2              __tk_scan(); // 使用了库里面的接口（闭源库）
- 468   2      
- 469   2              /* 用户循环扫描函数接口 */
- 470   2              user_handle();
- 471   2      
- 472   2              rf_scan(); // 扫描是否有RF信号，以及做相应的处理
- 473   2      
- 474   2      
- 475   2              // show_addr_info_save_by_type();
- 476   2              // show_addr_info_save_by_nums();
+ 463   1      #if USE_MY_DEBUG
+                  printf("sys reset\n"); // 表示系统刚上电 / 被复位
+              #endif //   #if USE_MY_DEBUG
+ 466   1      
+ 467   1          /* 系统主循环 */
+ 468   1          while (1)
+ 469   1          {
+ 470   2              /* 按键扫描函数 */
+ 471   2              __tk_scan(); // 使用了库里面的接口（闭源库）
+ 472   2      
+ 473   2              /* 用户循环扫描函数接口 */
+ 474   2              user_handle();
+ 475   2      
+ 476   2              rf_scan(); // 扫描是否有RF信号，以及做相应的处理
  477   2      
- 478   2              // delay_ms(500);
- 479   2      
- 480   2              // 测试通过
- 481   2              // LED6 = 1;
- 482   2              // delay_ms(500);
- 483   2              // LED6 = 0;
- 484   2              // delay_ms(500);
-C51 COMPILER V9.60.7.0   TK_SET                                                            09/30/2024 16:17:07 PAGE 9   
+ 478   2              // show_addr_info_save_by_type();
+ 479   2              // show_addr_info_save_by_nums();
+ 480   2      
+ 481   2              // delay_ms(500);
+ 482   2      
+ 483   2              // 测试通过
+ 484   2              // LED6 = 1;
+C51 COMPILER V9.60.7.0   TK_SET                                                            03/18/2025 09:10:52 PAGE 9   
 
- 485   2      
- 486   2              // 测试通过
- 487   2              // LED7 = 1;
- 488   2              // delay_ms(500);
- 489   2              // LED7 = 0;
- 490   2              // delay_ms(500);
- 491   2              
- 492   2              // P12 = ~P12;
- 493   2      
- 494   2              // flash_erase_sector(FLASH_DEVICE_START_ADDR);
- 495   2              // rf_learn();
+ 485   2              // delay_ms(500);
+ 486   2              // LED6 = 0;
+ 487   2              // delay_ms(500);
+ 488   2      
+ 489   2              // 测试通过
+ 490   2              // LED7 = 1;
+ 491   2              // delay_ms(500);
+ 492   2              // LED7 = 0;
+ 493   2              // delay_ms(500);
+ 494   2      
+ 495   2              // P12 = ~P12;
  496   2      
- 497   2              // rf_recv();
- 498   2      
- 499   2              // rf_recv_databuf();
- 500   2      
- 501   2              /* 调试打印函数，如果不需要打印则在tk_conf.h中将TK_DEBUG_EN设置为0 */
- 502   2      #if TK_DEBUG_EN
+ 497   2              // flash_erase_sector(FLASH_DEVICE_START_ADDR);
+ 498   2              // rf_learn();
+ 499   2      
+ 500   2              // rf_recv();
+ 501   2      
+ 502   2              // rf_recv_databuf();
+ 503   2      
+ 504   2              /* 调试打印函数，如果不需要打印则在tk_conf.h中将TK_DEBUG_EN设置为0 */
+ 505   2      #if TK_DEBUG_EN
                       if ((__tk_ms_flag >= 1) && (__tk_adjust_done_peng))
                       {
                           __tk_ms_flag = 0;
                           tk_debug_func();
                       }
-              #endif
- 509   2      
- 510   2              /* 喂狗 :建议不要关闭看门狗，默认2s复位*/
- 511   2              WDT_KEY = WDT_KEY_VAL(0xAA);
- 512   2          }
- 513   1      }
- 514          
- 515          /*************************** (C) COPYRIGHT 2022 TAIXIN-IC ***** END OF FILE *****/
+              #endif  
+ 512   2      
+ 513   2              /* 喂狗 :建议不要关闭看门狗，默认2s复位*/
+ 514   2              WDT_KEY = WDT_KEY_VAL(0xAA); 
+ 515   2          }
+ 516   1      }
+ 517          
+ 518          /*************************** (C) COPYRIGHT 2022 TAIXIN-IC ***** END OF FILE *****/
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    934    ----
+   CODE SIZE        =    727    ----
    CONSTANT SIZE    =     46    ----
    XDATA SIZE       =     72    ----
    PDATA SIZE       =   ----    ----
