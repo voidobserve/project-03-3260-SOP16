@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "key_conversion.h": "c"
+        "key_conversion.h": "c",
+        "rf_recv.h": "c",
+        "include.h": "c",
+        "tk_user.h": "c",
+        "tk_set.h": "c"
     }
 }

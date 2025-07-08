@@ -29,6 +29,8 @@
 
 #include "rf_scan.h"
 
+#include "stimer0.h"
+
 /** @addtogroup Template_Project
  * @{
  */
@@ -462,7 +464,7 @@ void tk_handle(void)
 
 #if USE_MY_DEBUG
     printf("sys reset\n"); // 表示系统刚上电 / 被复位
-#endif //   #if USE_MY_DEBUG
+#endif                     //   #if USE_MY_DEBUG
 
     /* 系统主循环 */
     while (1)
@@ -474,6 +476,13 @@ void tk_handle(void)
         user_handle();
 
         rf_scan(); // 扫描是否有RF信号，以及做相应的处理
+
+        if (flag_is_reinitialize_touch)
+        {
+            flag_is_reinitialize_touch = 0;
+            /* 按键初始化 */
+            tk_param_init();
+        }
 
         // show_addr_info_save_by_type();
         // show_addr_info_save_by_nums();
@@ -508,10 +517,10 @@ void tk_handle(void)
             __tk_ms_flag = 0;
             tk_debug_func();
         }
-#endif  
+#endif
 
         /* 喂狗 :建议不要关闭看门狗，默认2s复位*/
-        WDT_KEY = WDT_KEY_VAL(0xAA); 
+        WDT_KEY = WDT_KEY_VAL(0xAA);
     }
 }
 

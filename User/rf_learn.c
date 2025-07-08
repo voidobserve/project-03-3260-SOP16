@@ -5,6 +5,8 @@
 #include "send_key.h" // 发送键值，测试时用
 #include "tmr2.h"     // 使用定时器TMR2来实现5s延时
 
+#include "stimer0.h"
+
 #include <stdlib.h> // 使用了NULL
 
 addr_info_t addr_info = {0}; // 存放从flash中读出的器件地址
@@ -34,6 +36,9 @@ void rf_learn(void)
     {
         WDT_KEY = WDT_KEY_VAL(0xAA); // 喂狗
         rf_recv_databuf();           // 每次循环，试着读取一次数据
+
+        // 这段时间内，一直清空 触摸按键模块初始化的倒计时
+        touch_cnt_down_clear();
     }
 
     // 5s后，关闭定时器，清空它硬件的计数值

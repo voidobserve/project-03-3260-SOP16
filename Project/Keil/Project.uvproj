@@ -177,7 +177,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\SampTarg.dll</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -470,6 +470,11 @@
               <FileName>tmr4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\User\tmr4.c</FilePath>
+            </File>
+            <File>
+              <FileName>stimer0.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\stimer0.c</FilePath>
             </File>
           </Files>
         </Group>

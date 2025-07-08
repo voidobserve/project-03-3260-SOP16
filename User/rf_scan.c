@@ -31,6 +31,12 @@ void rf_scan(void)
         }
 #endif // end 测试能否接收和发送一个数据帧
 
+    if (recv_rf_flag)
+    {
+        // 收到遥控器数据，清空触摸按键模块初始化的倒计时
+        touch_cnt_down_clear();
+    }
+
     if (recv_rf_flag && 0 == timer_total_cnt && 0 == press_flag)
     {
         // 如果未按下，记录本次按下的时间

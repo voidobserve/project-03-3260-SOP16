@@ -29,6 +29,8 @@
 
 #include "key_conversion.h" // 包含了触摸按键对应的键值
 
+#include "stimer0.h"
+
 /** @addtogroup Template_Project
  * @{
  */
@@ -176,6 +178,8 @@ void user_init(void)
     tmr2_config(); // 上电5s内的"学习"所使用的定时器
     tmr3_config(); // 配置定时器，每10ms产生一次中断，对应的计数值+1，用来判断按键的短按、长按和持续
     tmr4_config(); // 打开识别遥控器双击所需要的定时器
+
+    stimer0_config(); // 1ms定时器
 
     // p01_output_config(); // 开发板LED6对应的引脚初始化
     // p26_output_config(); // 开发板LED7对应的引脚初始化
@@ -550,6 +554,13 @@ void user_handle(void)
 
     u16 send_data = 0; // 要发送的带有键值的数据
 
+    if (0 != __tk_key_flag)
+    {   
+        // 有按键按下，清零触摸按键模块初始化的倒计时
+        touch_cnt_down_clear();
+    }
+
+
     if (KeyOnOutput && 0 == long_touch_flag && cnt < TK_LONG_KEY_TIME) // 如果有按键按下（并且之前扫描到的不是长按）
     {
         // 通过循环判断是否为长按
@@ -604,6 +615,7 @@ void user_handle(void)
                         while (0 != KeyOnOutput)
                         {
                             WDT_KEY = WDT_KEY_VAL(0xAA);
+                            touch_cnt_down_clear(); // 清零触摸按键模块初始化的倒计时
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
@@ -639,6 +651,7 @@ void user_handle(void)
                         while (0 != KeyOnOutput)
                         {
                             WDT_KEY = WDT_KEY_VAL(0xAA);
+                            touch_cnt_down_clear(); // 清零触摸按键模块初始化的倒计时
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
@@ -673,6 +686,7 @@ void user_handle(void)
                         while (0 != KeyOnOutput)
                         {
                             WDT_KEY = WDT_KEY_VAL(0xAA);
+                            touch_cnt_down_clear(); // 清零触摸按键模块初始化的倒计时
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
@@ -707,6 +721,7 @@ void user_handle(void)
                         while (0 != KeyOnOutput)
                         {
                             WDT_KEY = WDT_KEY_VAL(0xAA);
+                            touch_cnt_down_clear(); // 清零触摸按键模块初始化的倒计时
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
@@ -741,6 +756,7 @@ void user_handle(void)
                         while (0 != KeyOnOutput)
                         {
                             WDT_KEY = WDT_KEY_VAL(0xAA);
+                            touch_cnt_down_clear(); // 清零触摸按键模块初始化的倒计时
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
@@ -775,6 +791,7 @@ void user_handle(void)
                         while (0 != KeyOnOutput)
                         {
                             WDT_KEY = WDT_KEY_VAL(0xAA);
+                            touch_cnt_down_clear(); // 清零触摸按键模块初始化的倒计时
                             __tk_scan();
                             KeyOnOutput = __tk_key_flag;
                         }
