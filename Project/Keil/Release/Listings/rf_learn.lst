@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 1   
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE RF_LEARN
@@ -16,77 +16,78 @@ line level    source
    5          #include "send_key.h" // ·¢ËÍ¼üÖµ£¬²âÊÔÊ±ÓÃ
    6          #include "tmr2.h"     // Ê¹ÓÃ¶¨Ê±Æ÷TMR2À´ÊµÏÖ5sÑÓÊ±
    7          
-   8          #include "stimer0.h"
-   9          
-  10          #include <stdlib.h> // Ê¹ÓÃÁËNULL
-  11          
-  12          addr_info_t addr_info = {0}; // ´æ·Å´ÓflashÖĞ¶Á³öµÄÆ÷¼şµØÖ·
-  13          
-  14          #ifdef LEARN_BY_QUANTITY // ±£´æn¸öÆ÷¼şµØÖ·
-  15          /**
-  16           * @brief RFÑ§Ï°¹¦ÄÜ£¬5sÄÚ¼ì²âµ½ÓĞ°´¼ü³¤°´£¬Ôò½«Õâ¸öÒ£¿ØÆ÷µÄÆ÷¼şµØÖ·Ğ´Èëµ½flashÖĞ£¨Ò»°ã·ÅÔÚÉÏµçµÄ5sÖĞÊ¹ÓÃ£
+   8          #include "timer0.h"
+   9          // #include "stimer0.h"
+  10          
+  11          #include <stdlib.h> // Ê¹ÓÃÁËNULL
+  12          
+  13          addr_info_t addr_info = {0}; // ´æ·Å´ÓflashÖĞ¶Á³öµÄÆ÷¼şµØÖ·
+  14          
+  15          #ifdef LEARN_BY_QUANTITY // ±£´æn¸öÆ÷¼şµØÖ·
+  16          /**
+  17           * @brief RFÑ§Ï°¹¦ÄÜ£¬5sÄÚ¼ì²âµ½ÓĞ°´¼ü³¤°´£¬Ôò½«Õâ¸öÒ£¿ØÆ÷µÄÆ÷¼şµØÖ·Ğ´Èëµ½flashÖĞ£¨Ò»°ã·ÅÔÚÉÏµçµÄ5sÖĞÊ¹ÓÃ£
              -©
-  17           *          Èç¹û my_config.hÎÄ¼şÖĞµÄUSE_RF_UNPAIRÎª1£¬ÄÇÃ´µ±ÊÕµ½ÓĞÓëflashÖĞÏàÍ¬µÄÆ÷¼şµØÖ·´«À´µÄĞÅºÅÊ±£¬
-  18           *          »á´ÓflashÖĞÉ¾³ı¸ÃµØÖ·Êı¾İ£¬ÊµÏÖÈ¡ÏûÅä¶Ô
-  19           */
-  20          void rf_learn(void)
-  21          {
-  22   1          u32 appear_themost_ele = 0; // RF½ÓÊÕÊı×éÖĞ³öÏÖ×î¶à´ÎÊıµÄÔªËØ
-  23   1      
-  24   1          u32 i = 0; // Ñ­»·¼ÆÊıÖµ
-  25   1          u32 j = 0; // Ñ­»·¼ÆÊıÖµ
-  26   1      
-  27   1          bit isSpare = 0; // ±êÖ¾Î»£¬flashÖĞÊÇ·ñÓĞ¿ÕÏĞÎ»ÖÃÀ´´æ´¢¿ÕµÄµØÖ·
-  28   1      
-  29   1          u32 temp = 0;             // ÁÙÊ±±äÁ¿£¬´æ·ÅÁÙÊ±Öµ
-  30   1          u32 the_oldest_index = 0; // ×î¾ÉµÄÆ÷¼şµØÖ·¶ÔÓ¦µÄÊı×éÏÂ±ê
-  31   1      
-  32   1          // ´ò¿ª¶¨Ê±Æ÷
-  33   1          tmr2_enable();
-  34   1      
-  35   1          while (tmr2_flag != 1)
-  36   1          {
-  37   2              WDT_KEY = WDT_KEY_VAL(0xAA); // Î¹¹·
-  38   2              rf_recv_databuf();           // Ã¿´ÎÑ­»·£¬ÊÔ×Å¶ÁÈ¡Ò»´ÎÊı¾İ
-  39   2      
-  40   2              // Õâ¶ÎÊ±¼äÄÚ£¬Ò»Ö±Çå¿Õ ´¥Ãş°´¼üÄ£¿é³õÊ¼»¯µÄµ¹¼ÆÊ±
-  41   2              touch_cnt_down_clear();
-  42   2          }
-  43   1      
-  44   1          // 5sºó£¬¹Ø±Õ¶¨Ê±Æ÷£¬Çå¿ÕËüÓ²¼şµÄ¼ÆÊıÖµ
-  45   1          tmr2_disable();
-  46   1          tmr2_flag = 0; // Çå³ı±êÖ¾Î»
-  47   1          tmr2_cnt = 0;  // Çå³ı¶¨Ê±Æ÷µÄ¼ÆÊıÖµ
-  48   1      
-  49   1          // ´ÓflashÖĞ¶ÁÈ¡Æ÷¼şµØÖ·
-  50   1          flash_read(FLASH_DEVICE_START_ADDR, (unsigned char *)(&addr_info), sizeof(addr_info));
-  51   1      
-  52   1          // Èç¹ûÕâ¶ÎÊ±¼äÄÚ¼ì²âµ½ÓĞ°´¼ü³¤°´£¬Ê¹µÃ±êÖ¾Î»ÖÃÒ»£¬½øĞĞÏà¹ØµÄ´¦Àí
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 2   
+  18           *          Èç¹û my_config.hÎÄ¼şÖĞµÄUSE_RF_UNPAIRÎª1£¬ÄÇÃ´µ±ÊÕµ½ÓĞÓëflashÖĞÏàÍ¬µÄÆ÷¼şµØÖ·´«À´µÄĞÅºÅÊ±£¬
+  19           *          »á´ÓflashÖĞÉ¾³ı¸ÃµØÖ·Êı¾İ£¬ÊµÏÖÈ¡ÏûÅä¶Ô
+  20           */
+  21          void rf_learn(void)
+  22          {
+  23   1          u32 appear_themost_ele = 0; // RF½ÓÊÕÊı×éÖĞ³öÏÖ×î¶à´ÎÊıµÄÔªËØ
+  24   1      
+  25   1          u32 i = 0; // Ñ­»·¼ÆÊıÖµ
+  26   1          u32 j = 0; // Ñ­»·¼ÆÊıÖµ
+  27   1      
+  28   1          bit isSpare = 0; // ±êÖ¾Î»£¬flashÖĞÊÇ·ñÓĞ¿ÕÏĞÎ»ÖÃÀ´´æ´¢¿ÕµÄµØÖ·
+  29   1      
+  30   1          u32 temp = 0;             // ÁÙÊ±±äÁ¿£¬´æ·ÅÁÙÊ±Öµ
+  31   1          u32 the_oldest_index = 0; // ×î¾ÉµÄÆ÷¼şµØÖ·¶ÔÓ¦µÄÊı×éÏÂ±ê
+  32   1      
+  33   1          // ´ò¿ª¶¨Ê±Æ÷
+  34   1          tmr2_enable();
+  35   1      
+  36   1          while (tmr2_flag != 1)
+  37   1          {
+  38   2              WDT_KEY = WDT_KEY_VAL(0xAA); // Î¹¹·
+  39   2              rf_recv_databuf();           // Ã¿´ÎÑ­»·£¬ÊÔ×Å¶ÁÈ¡Ò»´ÎÊı¾İ
+  40   2      
+  41   2              // Õâ¶ÎÊ±¼äÄÚ£¬Ò»Ö±Çå¿Õ ´¥Ãş°´¼üÄ£¿é³õÊ¼»¯µÄµ¹¼ÆÊ±
+  42   2              touch_cnt_down_clear();
+  43   2          }
+  44   1      
+  45   1          // 5sºó£¬¹Ø±Õ¶¨Ê±Æ÷£¬Çå¿ÕËüÓ²¼şµÄ¼ÆÊıÖµ
+  46   1          tmr2_disable();
+  47   1          tmr2_flag = 0; // Çå³ı±êÖ¾Î»
+  48   1          tmr2_cnt = 0;  // Çå³ı¶¨Ê±Æ÷µÄ¼ÆÊıÖµ
+  49   1      
+  50   1          // ´ÓflashÖĞ¶ÁÈ¡Æ÷¼şµØÖ·
+  51   1          flash_read(FLASH_DEVICE_START_ADDR, (unsigned char *)(&addr_info), sizeof(addr_info));
+  52   1      
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 2   
 
-  53   1          if (rf_data_buf_overflow)
-  54   1          {
-  55   2              rf_data_buf_overflow = 0;
-  56   2              // ÕÒ³öÊı×éÖĞ³öÏÖ´ÎÊı×î¶àµÄÔªËØ
-  57   2              appear_themost(rf_data_buf, sizeof(rf_data_buf) / sizeof(rf_data_buf[0]), &appear_themost_ele, NUL
+  53   1          // Èç¹ûÕâ¶ÎÊ±¼äÄÚ¼ì²âµ½ÓĞ°´¼ü³¤°´£¬Ê¹µÃ±êÖ¾Î»ÖÃÒ»£¬½øĞĞÏà¹ØµÄ´¦Àí
+  54   1          if (rf_data_buf_overflow)
+  55   1          {
+  56   2              rf_data_buf_overflow = 0;
+  57   2              // ÕÒ³öÊı×éÖĞ³öÏÖ´ÎÊı×î¶àµÄÔªËØ
+  58   2              appear_themost(rf_data_buf, sizeof(rf_data_buf) / sizeof(rf_data_buf[0]), &appear_themost_ele, NUL
              -L);
-  58   2      
-  59   2              // Èç¹û²»ÊÇµçÔ´°´¼ü(Ñ§Ï°°´¼ü)£¬º¯ÊıÍË³ö
-  60   2              if (((appear_themost_ele & 0xFF) != 0x01) && ((appear_themost_ele & 0xFF) != 0x03))
-  61   2              {
-  62   3                  return;
-  63   3              }
-  64   2      
-  65   2              // Èç¹ûÊÇµçÔ´°´¼ü
-  66   2              // ½«Æ÷¼şµØÖ·Ğ´Èëµ½µ¥Æ¬»úµÄflashÖĞ
-  67   2              // |--Èç¹ûÃ»ÓĞÔòÖ±½ÓĞ´Èë£¬Èç¹ûÓĞÔò¸²¸Ç×î¾ÉµÄÆ÷¼şµØÖ·£¬ÔÙÒ»´ÎĞÔĞ´Èë
-  68   2      
-  69   2              // Í¨¹ıÑ­»·ÅĞ¶ÏflashÖĞÊÇ·ñÒÑ¾­ÓĞ¶ÔÓ¦µÄµØÖ·
-  70   2              for (i = 0; i < ADDR_MAX_NUM; i++)
-  71   2              {
-  72   3                  if (addr_info.addr_buf[i] == (appear_themost_ele >> 8))
-  73   3                  {
-  74   4      #if USE_RF_UNPAIR // Èç¹û¿ªÆô È¡ÏûÅä¶Ô
+  59   2      
+  60   2              // Èç¹û²»ÊÇµçÔ´°´¼ü(Ñ§Ï°°´¼ü)£¬º¯ÊıÍË³ö
+  61   2              if (((appear_themost_ele & 0xFF) != 0x01) && ((appear_themost_ele & 0xFF) != 0x03))
+  62   2              {
+  63   3                  return;
+  64   3              }
+  65   2      
+  66   2              // Èç¹ûÊÇµçÔ´°´¼ü
+  67   2              // ½«Æ÷¼şµØÖ·Ğ´Èëµ½µ¥Æ¬»úµÄflashÖĞ
+  68   2              // |--Èç¹ûÃ»ÓĞÔòÖ±½ÓĞ´Èë£¬Èç¹ûÓĞÔò¸²¸Ç×î¾ÉµÄÆ÷¼şµØÖ·£¬ÔÙÒ»´ÎĞÔĞ´Èë
+  69   2      
+  70   2              // Í¨¹ıÑ­»·ÅĞ¶ÏflashÖĞÊÇ·ñÒÑ¾­ÓĞ¶ÔÓ¦µÄµØÖ·
+  71   2              for (i = 0; i < ADDR_MAX_NUM; i++)
+  72   2              {
+  73   3                  if (addr_info.addr_buf[i] == (appear_themost_ele >> 8))
+  74   3                  {
+  75   4      #if USE_RF_UNPAIR // Èç¹û¿ªÆô È¡ÏûÅä¶Ô
               
                               // ÈôÆ÷¼şµØÖ·ÏàÍ¬£¬Çå³ı¶ÔÓ¦µÄÊı¾İ
                               addr_info.addr_buf[i] = 0;
@@ -100,162 +101,162 @@ line level    source
                               return; // Ğ´ÈëÍê³É£¬º¯ÊıÖ±½Ó·µ»Ø
               
               #else // Èç¹ûÃ»ÓĞ¿ªÆô È¡ÏûÅä¶Ô
-  88   4      
-  89   4                      addr_info.weighted_val_buf[i] = 0;
-  90   4                      addr_info.addr_buf[i] = (appear_themost_ele >> 8); // ±£´æµØÖ·ÕâÒ»²½¿ÉÒÔ²»ÓÃ¼Ó£¬ÒòÎª´ËÊ±µØ
+  89   4      
+  90   4                      addr_info.weighted_val_buf[i] = 0;
+  91   4                      addr_info.addr_buf[i] = (appear_themost_ele >> 8); // ±£´æµØÖ·ÕâÒ»²½¿ÉÒÔ²»ÓÃ¼Ó£¬ÒòÎª´ËÊ±µØ
              -Ö·ÊÇÏàÍ¬µÄ
-  91   4      
-  92   4                      if (0x01 == (appear_themost_ele & 0xFF))
-  93   4                      {
-  94   5                          // Èç¹ûÊÇ´óÒ¡¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
-  95   5                          addr_info.remote_type[i] = REMOTE_TYPE_BIG_RM;
-  96   5                      }
-  97   4                      else if (0x03 == (appear_themost_ele & 0xFF))
-  98   4                      {
-  99   5                          // Èç¹ûÊÇĞ¡Ò£¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
- 100   5                          addr_info.remote_type[i] = REMOTE_TYPE_SMALL_RM;
- 101   5                      }
- 102   4      
- 103   4                      // Ôö¼ÓÆäËûµØÖ·µÄÈ¨Öµ£¨²»Ôö¼Ó¿ÕµÄµØÖ·µÄÈ¨Öµ£©
- 104   4                      for (j = 0; j < ADDR_MAX_NUM; j++)
- 105   4                      {
- 106   5                          if ((j != i) && (addr_info.addr_buf[j] != 0))
- 107   5                          {
- 108   6                              addr_info.weighted_val_buf[j]++;
- 109   6                          }
- 110   5                      }
- 111   4      
- 112   4                      // ×îºó£¬½«Æ÷¼şµØÖ·Ğ´»Øflash
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 3   
+  92   4      
+  93   4                      if (0x01 == (appear_themost_ele & 0xFF))
+  94   4                      {
+  95   5                          // Èç¹ûÊÇ´óÒ¡¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
+  96   5                          addr_info.remote_type[i] = REMOTE_TYPE_BIG_RM;
+  97   5                      }
+  98   4                      else if (0x03 == (appear_themost_ele & 0xFF))
+  99   4                      {
+ 100   5                          // Èç¹ûÊÇĞ¡Ò£¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
+ 101   5                          addr_info.remote_type[i] = REMOTE_TYPE_SMALL_RM;
+ 102   5                      }
+ 103   4      
+ 104   4                      // Ôö¼ÓÆäËûµØÖ·µÄÈ¨Öµ£¨²»Ôö¼Ó¿ÕµÄµØÖ·µÄÈ¨Öµ£©
+ 105   4                      for (j = 0; j < ADDR_MAX_NUM; j++)
+ 106   4                      {
+ 107   5                          if ((j != i) && (addr_info.addr_buf[j] != 0))
+ 108   5                          {
+ 109   6                              addr_info.weighted_val_buf[j]++;
+ 110   6                          }
+ 111   5                      }
+ 112   4      
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 3   
 
- 113   4                      flash_erase_sector(FLASH_DEVICE_START_ADDR);
- 114   4                      flash_write(FLASH_DEVICE_START_ADDR, (unsigned char *)(&addr_info), sizeof(addr_info));
- 115   4                      return; // ½áÊøÑ§Ï°
- 116   4      
- 117   4      #endif // end if USE_RF_UNPAIR
- 118   4                  }
- 119   3              }
- 120   2      
- 121   2              // Èç¹ûÒª±£´æµÄµØÖ·ÔÚflashÖĞ²¢Ã»ÓĞÖØ¸´
- 122   2              // |---ÕÒÒ»´¦¿ÕµÄµØ·½±£´æ£¬Èç¹ûÃ»ÓĞ£¬Ôò¸²¸Ç×î¾ÉµÄÆ÷¼şµØÖ·
- 123   2              for (i = 0; i < ADDR_MAX_NUM; i++)
- 124   2              {
- 125   3                  if ((addr_info.weighted_val_buf[i] == 0) && (addr_info.addr_buf[i] == 0))
- 126   3                  {
- 127   4                      // Èç¹ûÓĞ¿ÕµÄµØ·½£¬Ö±½Ó±£´æ
- 128   4                      addr_info.weighted_val_buf[i] = 0;
- 129   4                      addr_info.addr_buf[i] = (appear_themost_ele >> 8);
- 130   4      
- 131   4                      if (0x01 == (appear_themost_ele & 0xFF))
- 132   4                      {
- 133   5                          // Èç¹ûÊÇ´óÒ¡¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
- 134   5                          addr_info.remote_type[i] = REMOTE_TYPE_BIG_RM;
- 135   5                      }
- 136   4                      else if (0x03 == (appear_themost_ele & 0xFF))
- 137   4                      {
- 138   5                          // Èç¹ûÊÇĞ¡Ò£¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
- 139   5                          addr_info.remote_type[i] = REMOTE_TYPE_SMALL_RM;
- 140   5                      }
- 141   4      
- 142   4                      // Ôö¼ÓÆäËûµØÖ·µÄÈ¨Öµ£¨²»Ôö¼Ó¿ÕµÄµØÖ·µÄÈ¨Öµ£©
- 143   4                      for (j = 0; j < ADDR_MAX_NUM; j++)
- 144   4                      {
- 145   5                          if ((j != i) && (addr_info.addr_buf[j] != 0))
- 146   5                          {
- 147   6                              addr_info.weighted_val_buf[j]++;
- 148   6                          }
- 149   5                      }
- 150   4      
- 151   4                      isSpare = 1;
- 152   4                      break;
- 153   4                  }
- 154   3              }
- 155   2      
- 156   2              // Èç¹ûÃ»ÓĞ¿ÕÓàµÄµØ·½£¬Ôò¸²¸Ç×î¾ÉµÄÆ÷¼şµØÖ·
- 157   2              if (0 == isSpare)
- 158   2              {
- 159   3                  // Í¨¹ıÑ­»·ÕÒµ½×î¾ÉµÄµØÖ·ËùÔÚµÄÊı×éÏÂ±ê
- 160   3                  for (i = 0; i < ADDR_MAX_NUM; i++)
- 161   3                  {
- 162   4                      if (addr_info.weighted_val_buf[i] > temp)
- 163   4                      {
- 164   5                          temp = addr_info.weighted_val_buf[i];
- 165   5                          the_oldest_index = i;
- 166   5                      }
- 167   4                  }
- 168   3      
- 169   3                  addr_info.addr_buf[the_oldest_index] = (appear_themost_ele >> 8); // ±£´æÆ÷¼şµØÖ·
- 170   3                  addr_info.weighted_val_buf[the_oldest_index] = 0;                 // È¨ÖµÉèÖÃÎª0
- 171   3      
- 172   3                  if (0x01 == (appear_themost_ele & 0xFF))
- 173   3                  {
- 174   4                      // Èç¹ûÊÇ´óÒ¡¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 4   
+ 113   4                      // ×îºó£¬½«Æ÷¼şµØÖ·Ğ´»Øflash
+ 114   4                      flash_erase_sector(FLASH_DEVICE_START_ADDR);
+ 115   4                      flash_write(FLASH_DEVICE_START_ADDR, (unsigned char *)(&addr_info), sizeof(addr_info));
+ 116   4                      return; // ½áÊøÑ§Ï°
+ 117   4      
+ 118   4      #endif // end if USE_RF_UNPAIR
+ 119   4                  }
+ 120   3              }
+ 121   2      
+ 122   2              // Èç¹ûÒª±£´æµÄµØÖ·ÔÚflashÖĞ²¢Ã»ÓĞÖØ¸´
+ 123   2              // |---ÕÒÒ»´¦¿ÕµÄµØ·½±£´æ£¬Èç¹ûÃ»ÓĞ£¬Ôò¸²¸Ç×î¾ÉµÄÆ÷¼şµØÖ·
+ 124   2              for (i = 0; i < ADDR_MAX_NUM; i++)
+ 125   2              {
+ 126   3                  if ((addr_info.weighted_val_buf[i] == 0) && (addr_info.addr_buf[i] == 0))
+ 127   3                  {
+ 128   4                      // Èç¹ûÓĞ¿ÕµÄµØ·½£¬Ö±½Ó±£´æ
+ 129   4                      addr_info.weighted_val_buf[i] = 0;
+ 130   4                      addr_info.addr_buf[i] = (appear_themost_ele >> 8);
+ 131   4      
+ 132   4                      if (0x01 == (appear_themost_ele & 0xFF))
+ 133   4                      {
+ 134   5                          // Èç¹ûÊÇ´óÒ¡¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
+ 135   5                          addr_info.remote_type[i] = REMOTE_TYPE_BIG_RM;
+ 136   5                      }
+ 137   4                      else if (0x03 == (appear_themost_ele & 0xFF))
+ 138   4                      {
+ 139   5                          // Èç¹ûÊÇĞ¡Ò£¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
+ 140   5                          addr_info.remote_type[i] = REMOTE_TYPE_SMALL_RM;
+ 141   5                      }
+ 142   4      
+ 143   4                      // Ôö¼ÓÆäËûµØÖ·µÄÈ¨Öµ£¨²»Ôö¼Ó¿ÕµÄµØÖ·µÄÈ¨Öµ£©
+ 144   4                      for (j = 0; j < ADDR_MAX_NUM; j++)
+ 145   4                      {
+ 146   5                          if ((j != i) && (addr_info.addr_buf[j] != 0))
+ 147   5                          {
+ 148   6                              addr_info.weighted_val_buf[j]++;
+ 149   6                          }
+ 150   5                      }
+ 151   4      
+ 152   4                      isSpare = 1;
+ 153   4                      break;
+ 154   4                  }
+ 155   3              }
+ 156   2      
+ 157   2              // Èç¹ûÃ»ÓĞ¿ÕÓàµÄµØ·½£¬Ôò¸²¸Ç×î¾ÉµÄÆ÷¼şµØÖ·
+ 158   2              if (0 == isSpare)
+ 159   2              {
+ 160   3                  // Í¨¹ıÑ­»·ÕÒµ½×î¾ÉµÄµØÖ·ËùÔÚµÄÊı×éÏÂ±ê
+ 161   3                  for (i = 0; i < ADDR_MAX_NUM; i++)
+ 162   3                  {
+ 163   4                      if (addr_info.weighted_val_buf[i] > temp)
+ 164   4                      {
+ 165   5                          temp = addr_info.weighted_val_buf[i];
+ 166   5                          the_oldest_index = i;
+ 167   5                      }
+ 168   4                  }
+ 169   3      
+ 170   3                  addr_info.addr_buf[the_oldest_index] = (appear_themost_ele >> 8); // ±£´æÆ÷¼şµØÖ·
+ 171   3                  addr_info.weighted_val_buf[the_oldest_index] = 0;                 // È¨ÖµÉèÖÃÎª0
+ 172   3      
+ 173   3                  if (0x01 == (appear_themost_ele & 0xFF))
+ 174   3                  {
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 4   
 
- 175   4                      addr_info.remote_type[the_oldest_index] = REMOTE_TYPE_BIG_RM;
- 176   4                  }
- 177   3                  else if (0x03 == (appear_themost_ele & 0xFF))
- 178   3                  {
- 179   4                      // Èç¹ûÊÇĞ¡Ò£¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
- 180   4                      addr_info.remote_type[the_oldest_index] = REMOTE_TYPE_SMALL_RM;
- 181   4                  }
- 182   3      
- 183   3                  // Ôö¼ÓÆäËûµÄÆ÷¼şµØÖ·µÄÈ¨Öµ£¨ÕâÀïÒª¿¼ÂÇ²»Ôö¼Ó¿ÕµÄÆ÷¼şµØÖ·µÄÈ¨Öµ£©
- 184   3                  for (j = 0; j < ADDR_MAX_NUM; j++)
- 185   3                  {
- 186   4                      if ((j != the_oldest_index) && (addr_info.addr_buf[j] != 0))
- 187   4                      {
- 188   5                          addr_info.weighted_val_buf[j]++;
- 189   5                      }
- 190   4                  }
- 191   3              }
- 192   2      
- 193   2              // ×îºó£¬½«Æ÷¼şµØÖ·Ğ´»Øflash
- 194   2              flash_erase_sector(FLASH_DEVICE_START_ADDR);
- 195   2              flash_write(FLASH_DEVICE_START_ADDR, (unsigned char *)(&addr_info), sizeof(addr_info));
- 196   2          }
- 197   1      }
- 198          
- 199          // ÅĞ¶Ïµ±Ç°½ÓÊÕµÄÊı¾İµÄµØÖ·ÊÇ·ñÓëflashÖĞ±£´æµÄµØÖ·Æ¥Åä
- 200          // ĞèÒªÏÈÑ§Ï°£¬´ÓflashÖĞ¶Á³öÊı¾İ
- 201          // ·µ»Ø£º 0--²»Æ¥Åä£¬1--Æ¥Åä
- 202          u8 rf_addr_isMatch(void)
- 203          {
- 204   1          u8 i = 0;
- 205   1          for (i = 0; i < ADDR_MAX_NUM; i++)
- 206   1          {
- 207   2              if (addr_info.addr_buf[i] == (rf_data >> 8))
- 208   2              {
- 209   3                  return 1;
- 210   3              }
- 211   2          }
- 212   1      
- 213   1          return 0;
- 214   1      }
- 215          
- 216          // ²âÊÔº¯Êı£¬²é¿´flashÖĞ°´²»Í¬µØÖ·À´±£´æµÄËùÓĞÆ÷¼şµØÖ·
- 217          void show_addr_info_save_by_nums(void)
- 218          {
- 219   1          u32 i;
- 220   1      
- 221   1          for (i = 0; i < ADDR_MAX_NUM; i++)
- 222   1          {
- 223   2              send_keyval(addr_info.weighted_val_buf[i]);
- 224   2              send_keyval(addr_info.addr_buf[i]);
- 225   2          }
- 226   1      }
- 227          
- 228          #endif // end of #ifdef LEARN_BY_QUANTITY
- 229          
- 230          #ifdef LEARN_BY_TYPE
+ 175   4                      // Èç¹ûÊÇ´óÒ¡¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
+ 176   4                      addr_info.remote_type[the_oldest_index] = REMOTE_TYPE_BIG_RM;
+ 177   4                  }
+ 178   3                  else if (0x03 == (appear_themost_ele & 0xFF))
+ 179   3                  {
+ 180   4                      // Èç¹ûÊÇĞ¡Ò£¿ØÆ÷ÉÏÃæµÄµçÔ´°´¼ü/Ñ§Ï°°´¼ü
+ 181   4                      addr_info.remote_type[the_oldest_index] = REMOTE_TYPE_SMALL_RM;
+ 182   4                  }
+ 183   3      
+ 184   3                  // Ôö¼ÓÆäËûµÄÆ÷¼şµØÖ·µÄÈ¨Öµ£¨ÕâÀïÒª¿¼ÂÇ²»Ôö¼Ó¿ÕµÄÆ÷¼şµØÖ·µÄÈ¨Öµ£©
+ 185   3                  for (j = 0; j < ADDR_MAX_NUM; j++)
+ 186   3                  {
+ 187   4                      if ((j != the_oldest_index) && (addr_info.addr_buf[j] != 0))
+ 188   4                      {
+ 189   5                          addr_info.weighted_val_buf[j]++;
+ 190   5                      }
+ 191   4                  }
+ 192   3              }
+ 193   2      
+ 194   2              // ×îºó£¬½«Æ÷¼şµØÖ·Ğ´»Øflash
+ 195   2              flash_erase_sector(FLASH_DEVICE_START_ADDR);
+ 196   2              flash_write(FLASH_DEVICE_START_ADDR, (unsigned char *)(&addr_info), sizeof(addr_info));
+ 197   2          }
+ 198   1      }
+ 199          
+ 200          // ÅĞ¶Ïµ±Ç°½ÓÊÕµÄÊı¾İµÄµØÖ·ÊÇ·ñÓëflashÖĞ±£´æµÄµØÖ·Æ¥Åä
+ 201          // ĞèÒªÏÈÑ§Ï°£¬´ÓflashÖĞ¶Á³öÊı¾İ
+ 202          // ·µ»Ø£º 0--²»Æ¥Åä£¬1--Æ¥Åä
+ 203          u8 rf_addr_isMatch(void)
+ 204          {
+ 205   1          u8 i = 0;
+ 206   1          for (i = 0; i < ADDR_MAX_NUM; i++)
+ 207   1          {
+ 208   2              if (addr_info.addr_buf[i] == (rf_data >> 8))
+ 209   2              {
+ 210   3                  return 1;
+ 211   3              }
+ 212   2          }
+ 213   1      
+ 214   1          return 0;
+ 215   1      }
+ 216          
+ 217          // ²âÊÔº¯Êı£¬²é¿´flashÖĞ°´²»Í¬µØÖ·À´±£´æµÄËùÓĞÆ÷¼şµØÖ·
+ 218          void show_addr_info_save_by_nums(void)
+ 219          {
+ 220   1          u32 i;
+ 221   1      
+ 222   1          for (i = 0; i < ADDR_MAX_NUM; i++)
+ 223   1          {
+ 224   2              send_keyval(addr_info.weighted_val_buf[i]);
+ 225   2              send_keyval(addr_info.addr_buf[i]);
+ 226   2          }
+ 227   1      }
+ 228          
+ 229          #endif // end of #ifdef LEARN_BY_QUANTITY
+ 230          
+ 231          #ifdef LEARN_BY_TYPE
               /**
                * @brief RFÑ§Ï°¹¦ÄÜ£¬5sÄÚ¼ì²âµ½ÓĞ°´¼ü³¤°´£¬Ôò½«Õâ¸öÒ£¿ØÆ÷µÄÆ÷¼şµØÖ·Ğ´Èëµ½flashÖĞ£¨Ò»°ã·ÅÔÚÉÏµçµÄ5sÖĞÊ¹ÓÃ£
              -©
                *          Èç¹û my_config.hÎÄ¼şÖĞµÄUSE_RF_UNPAIRÎª1£¬ÄÇÃ´µ±ÊÕµ½ÓĞÓëflashÖĞÏàÍ¬µÄÆ÷¼şµØÖ·´«À´µÄĞÅºÅÊ±£¬
                *          »á´ÓflashÖĞÉ¾³ı¸ÃµØÖ·Êı¾İ£¬ÊµÏÖÈ¡ÏûÅä¶Ô
-               */
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 5   
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 5   
 
+               */
               void rf_learn(void)
               {
                   u32 appear_themost_ele = 0; // RF½ÓÊÕÊı×éÖĞ³öÏÖ×î¶à´ÎÊıµÄÔªËØ
@@ -317,9 +318,9 @@ line level    source
                           {
               #if USE_RF_UNPAIR // Èç¹ûÊ¹ÓÃÁËÈ¡ÏûÅä¶Ô
               
-                              // ÈôÆ÷¼şµØÖ·ÏàÍ¬£¬Çå³ı¶ÔÓ¦µÄÊı¾İ
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 6   
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 6   
 
+                              // ÈôÆ÷¼şµØÖ·ÏàÍ¬£¬Çå³ı¶ÔÓ¦µÄÊı¾İ
                               addr_info.addr_buf[i] = 0;
                               addr_info.type_buf[i] = 0;
                               addr_info.weighted_val_buf[i] = 0;
@@ -381,9 +382,9 @@ line level    source
               
                           // Èç¹ûÃ»ÓĞ¿ÕÓàµÄµØ·½£¬Ôò¸²¸Ç×î¾ÉµÄÀàĞÍºÍÆ÷¼şµØÖ·
                           if (0 == isSpare)
-                          {
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 7   
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 7   
 
+                          {
                               // Í¨¹ıÑ­»·ÕÒµ½×î¾ÉµÄÀàĞÍËùÔÚµÄÊı×éÏÂ±ê
                               for (i = 0; i < ADDR_MAX_TYPE_NUM; i++)
                               {
@@ -445,9 +446,9 @@ line level    source
                   }
               }
               
-              #endif // end ifdef LEARN_BY_TYPE
-C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/08/2025 17:28:58 PAGE 8   
+C51 COMPILER V9.60.7.0   RF_LEARN                                                          07/10/2025 11:57:31 PAGE 8   
 
+              #endif // end ifdef LEARN_BY_TYPE
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

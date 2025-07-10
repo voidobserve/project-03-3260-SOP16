@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   STIMER0                                                           07/08/2025 17:09:14 PAGE 1   
+C51 COMPILER V9.60.7.0   STIMER0                                                           07/10/2025 10:34:55 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE STIMER0
@@ -11,69 +11,59 @@ line level    source
 
    1          #include "stimer0.h"
    2          
-   3          // 触摸按键模块初始化的倒计时
-   4          static volatile u32 touch_init_cnt = 0;
+   3          // // 触摸按键模块初始化的倒计时
+   4          // static volatile u32 touch_init_cnt = 0;
    5          
-   6          volatile bit flag_is_reinitialize_touch = 0; // 是否需要重新初始化触摸按键
+   6          // volatile bit flag_is_reinitialize_touch = 0; // 是否需要重新初始化触摸按键
    7          
-   8          // 清零触摸按键模块初始化的倒计时
-   9          void touch_cnt_down_clear(void)
-  10          {
-  11   1          touch_init_cnt = 0;
-  12   1          flag_is_reinitialize_touch = 0;
-  13   1      }
-  14          
-  15          void stimer0_config(void)
-  16          {
-  17   1          // STIMER0配置中断频率为1kHz
-  18   1          __EnableIRQ(STMR0_IRQn);                                    // 使能STMR0模块中断
-  19   1          STMR0_PSC = STMR_PRESCALE_VAL(0x00);                        // 不分频
-  20   1          STMR0_PRH = STMR_PRD_VAL_H((STMR0_PEROID_VAL >> 8) & 0xFF); // 周期高八位寄存器
-  21   1          STMR0_PRL = STMR_PRD_VAL_L((STMR0_PEROID_VAL >> 0) & 0xFF); // 周期低八位寄存器
-  22   1          STMR0_IE = STMR_ZERO_IRQ_EN(0x1);                           // 计数值等于0中断
-  23   1          STMR_CNTMD |= STMR_0_CNT_MODE(0x1);                         // 选择连续计数模式
-  24   1          STMR_LOADEN |= STMR_0_LOAD_EN(0x1);                         // 自动装载使能
-  25   1      }
-  26          
-  27          void STMR0_IRQHandler(void) interrupt STMR0_IRQn
-  28          {
-  29   1          // 进入中断设置IP，不可删除
-  30   1          __IRQnIPnPush(STMR0_IRQn);
-  31   1      
-  32   1          // ---------------- 用户函数处理 -------------------
-  33   1      
-  34   1          // 计数值等于0中断
-  35   1          if (STMR0_IF & STMR_ZERO_FLAG(0x1))
-  36   1          {
-  37   2              STMR0_IF |= STMR_ZERO_FLAG(0x1); // 清中断标志位
-  38   2      
-  39   2              if (touch_init_cnt < 4294967296) // 防止计数溢出 （2^32）
-  40   2              {
-  41   3                  touch_init_cnt++;
-  42   3                  if (touch_init_cnt >= 5000)
-  43   3                  {
-  44   4                      touch_init_cnt = 0;
-  45   4                      flag_is_reinitialize_touch = 1;
-  46   4                  }
-  47   3              }
-  48   2          }
-  49   1      
-  50   1          // 退出中断设置IP，不可删除
-  51   1          __IRQnIPnPop(STMR0_IRQn);
-  52   1      }
-
-C51 COMPILER V9.60.7.0   STIMER0                                                           07/08/2025 17:09:14 PAGE 2   
+   8          
+   9          
+  10          void stimer0_config(void)
+  11          {
+  12   1          // STIMER0配置中断频率为1kHz
+  13   1          IE_EA = 1;                                                  // 使能总开关
+  14   1          __EnableIRQ(STMR0_IRQn);                                    // 使能STMR0模块中断
+  15   1          STMR0_PSC = STMR_PRESCALE_VAL(0x00);                        // 不分频
+  16   1          STMR0_PRH = STMR_PRD_VAL_H((STMR0_PEROID_VAL >> 8) & 0xFF); // 周期高八位寄存器
+  17   1          STMR0_PRL = STMR_PRD_VAL_L((STMR0_PEROID_VAL >> 0) & 0xFF); // 周期低八位寄存器
+  18   1          STMR0_IE = STMR_ZERO_IRQ_EN(0x1);                           // 计数值等于0中断
+  19   1          STMR_CNTMD |= STMR_0_CNT_MODE(0x1);                         // 选择连续计数模式
+  20   1          STMR_LOADEN |= STMR_0_LOAD_EN(0x1);                         // 自动装载使能
+  21   1      }
+  22          
+  23          void STMR0_IRQHandler(void) interrupt STMR0_IRQn
+  24          {
+  25   1          // 进入中断设置IP，不可删除
+  26   1          __IRQnIPnPush(STMR0_IRQn);
+  27   1      
+  28   1          // ---------------- 用户函数处理 -------------------
+  29   1      
+  30   1          // 计数值等于0中断
+  31   1          if (STMR0_IF & STMR_ZERO_FLAG(0x1))
+  32   1          {
+  33   2              STMR0_IF |= STMR_ZERO_FLAG(0x1); // 清中断标志位
+  34   2      
+  35   2              P15 = ~P15;
+  36   2      
+  37   2            
+  38   2          }
+  39   1      
+  40   1          // 退出中断设置IP，不可删除
+  41   1          __IRQnIPnPop(STMR0_IRQn);
+  42   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    180    ----
+   CODE SIZE        =     64    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =      4    ----
+   XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
-   BIT SIZE         =      1    ----
+   BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
+
+C51 COMPILER V9.60.7.0   STIMER0                                                           07/10/2025 10:34:55 PAGE 2   
 
 
 C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

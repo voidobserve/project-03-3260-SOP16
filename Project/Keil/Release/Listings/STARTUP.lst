@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  STARTUP                                                              07/08/2025 16:48:51 PAGE     1
+A51 MACRO ASSEMBLER  STARTUP                                                              07/10/2025 11:16:57 PAGE     1
 
 
 MACRO ASSEMBLER A51 V8.2.7.0
@@ -65,7 +65,7 @@ LOC  OBJ            LINE     SOURCE
                       53     ;     <i> The length of PDATA memory in bytes.      PDATA内存的大小以字节为单位
   0000                54     PDATALEN        EQU     0H
                       55     ;
-A51 MACRO ASSEMBLER  STARTUP                                                              07/08/2025 16:48:51 PAGE     2
+A51 MACRO ASSEMBLER  STARTUP                                                              07/10/2025 11:16:57 PAGE     2
 
                       56     ;</h>
                       57     ;------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ LOC  OBJ            LINE     SOURCE
                              TA变量的XDATA页
                       99     ;  <i>PPAGE must conform with the PPAGE set in the linker invocation.           PPAGE必须与
                              链接器调用中设置的PPAGE一致
-A51 MACRO ASSEMBLER  STARTUP                                                              07/08/2025 16:48:51 PAGE     3
+A51 MACRO ASSEMBLER  STARTUP                                                              07/10/2025 11:16:57 PAGE     3
 
                      100     ;
                      101     ; Enable pdata memory page initalization    启动pdata内存页初始化
@@ -201,7 +201,7 @@ LOC  OBJ            LINE     SOURCE
 0010 DFFC            159                     DJNZ    R7,XDATALOOP
 0012 DEFA            160                     DJNZ    R6,XDATALOOP
                      161     ENDIF
-A51 MACRO ASSEMBLER  STARTUP                                                              07/08/2025 16:48:51 PAGE     4
+A51 MACRO ASSEMBLER  STARTUP                                                              07/10/2025 11:16:57 PAGE     4
 
                      162     
                      163     IF PPAGEENABLE <> 0
@@ -257,7 +257,7 @@ LOC  OBJ            LINE     SOURCE
 000D 0000            213                     DW      00H
                      214     
                      215                     END
-A51 MACRO ASSEMBLER  STARTUP                                                              07/08/2025 16:48:51 PAGE     5
+A51 MACRO ASSEMBLER  STARTUP                                                              07/10/2025 11:16:57 PAGE     5
 
 SYMBOL TABLE LISTING
 ------ ----- -------

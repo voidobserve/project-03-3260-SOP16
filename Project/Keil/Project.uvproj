@@ -472,9 +472,9 @@
               <FilePath>..\..\User\tmr4.c</FilePath>
             </File>
             <File>
-              <FileName>stimer0.c</FileName>
+              <FileName>timer0.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\User\stimer0.c</FilePath>
+              <FilePath>..\..\User\timer0.c</FilePath>
             </File>
           </Files>
         </Group>

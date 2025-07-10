@@ -29,7 +29,8 @@
 
 #include "key_conversion.h" // 包含了触摸按键对应的键值
 
-#include "stimer0.h"
+// #include "stimer0.h"
+#include "timer0.h"
 
 /** @addtogroup Template_Project
  * @{
@@ -156,38 +157,39 @@ void led_init(void)
 extern void uart1_config(void);
 #endif // #if USE_MY_DEBUG
 
-/**
- * @brief  用户代码初始化函数接口.
- * @param  None
- * @retval None
- */
-void user_init(void)
-{
-    // led_init(); // 初始化LED相关的引脚
+// /**
+//  * @brief  用户代码初始化函数接口.
+//  * @param  None
+//  * @retval None
+//  */
+// void user_init(void)
+// {
+//     // led_init(); // 初始化LED相关的引脚
 
-    rfin_init(); // RF315接收引脚初始化，这里也初始化了tmr0
+//     timer0_config();
+//     rfin_init(); // RF315接收引脚初始化，这里也初始化了tmr0
 
-    // p12_output_config(); // 测试用，P12初始化，配置为输出模式
+//     // p12_output_config(); // 测试用，P12初始化，配置为输出模式
 
-    send_keyval_pin_init();   // 初始化键值的发送引脚
-    send_keyval_timer_init(); // 初始化发送键值的引脚所使用到的定时器，定时器默认关闭
+//     send_keyval_pin_init();   // 初始化键值的发送引脚
+//     send_keyval_timer_init(); // 初始化发送键值的引脚所使用到的定时器，定时器默认关闭
 
-    tmr0_enable(); // 打开采集RF信号的定时器
-    // tmr1_enable(); // 打开发送键值的引脚所使用到的定时器，测试用，看看定时器中断是否按配置的时间触发
+//     // tmr0_enable(); // 打开采集RF信号的定时器
+//     // tmr1_enable(); // 打开发送键值的引脚所使用到的定时器，测试用，看看定时器中断是否按配置的时间触发
 
-    tmr2_config(); // 上电5s内的"学习"所使用的定时器
-    tmr3_config(); // 配置定时器，每10ms产生一次中断，对应的计数值+1，用来判断按键的短按、长按和持续
-    tmr4_config(); // 打开识别遥控器双击所需要的定时器
+//     tmr2_config(); // 上电5s内的"学习"所使用的定时器
+//     tmr3_config(); // 配置定时器，每10ms产生一次中断，对应的计数值+1，用来判断按键的短按、长按和持续
+//     tmr4_config(); // 打开识别遥控器双击所需要的定时器
 
-    stimer0_config(); // 1ms定时器
+//     // stimer0_config(); // 1ms定时器
 
-    // p01_output_config(); // 开发板LED6对应的引脚初始化
-    // p26_output_config(); // 开发板LED7对应的引脚初始化
+//     // p01_output_config(); // 开发板LED6对应的引脚初始化
+//     // p26_output_config(); // 开发板LED7对应的引脚初始化
 
-#if USE_MY_DEBUG
-    uart1_config();
-#endif //     #if USE_MY_DEBUG
-}
+// #if USE_MY_DEBUG
+//     uart1_config();
+// #endif //     #if USE_MY_DEBUG
+// }
 
 // void led_display(void)
 // {
@@ -555,11 +557,10 @@ void user_handle(void)
     u16 send_data = 0; // 要发送的带有键值的数据
 
     if (0 != __tk_key_flag)
-    {   
+    {
         // 有按键按下，清零触摸按键模块初始化的倒计时
         touch_cnt_down_clear();
     }
-
 
     if (KeyOnOutput && 0 == long_touch_flag && cnt < TK_LONG_KEY_TIME) // 如果有按键按下（并且之前扫描到的不是长按）
     {

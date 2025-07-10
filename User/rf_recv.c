@@ -39,7 +39,7 @@ static volatile unsigned char rf_data_buf_index = 0; // 接收数据缓冲区的索引
 unsigned char rf_data_buf_overflow = 0;				 // 接收缓冲区溢出的标志位
 
 // RFIN引脚初始化（RF接收引脚初始化）
-// 这里也使用到了定时器TMR0，配置成每100us左右产生一次中断（误差20us），不过该函数调用完后，定时器TMR0是关闭的
+// 这里也使用到了定时器TMR0，配置成每100us左右产生一次中断（误差20us），不过该函数调用完后，定时器TMR0是关闭的(最新版是一直打开100us的中断)
 void rfin_init(void)
 {
 
@@ -60,20 +60,23 @@ void rfin_init(void)
 
 #ifdef CIRCUIT_BOARD
 
+	P1_PU |= GPIO_P13_PULL_UP(0x01); // 上拉
 	// 配置P1_3为输入模式
-	P1_MD0 &= ~GPIO_P13_MODE_SEL(0x01);
-	// 配置P1_3为下拉，因为RF接收模块的输出在空闲时默认为低电平
-	P1_PD |= GPIO_P13_PULL_PD(0x01);
+	P1_MD0 &= ~GPIO_P13_MODE_SEL(0x03);
 
-	__SetIRQnIP(P1_IRQn, P1_IQn_CFG);	// 设置中断优先级
-	__EnableIRQ(P1_IRQn);				// 使能中断
-	IE_EA = 1;							// 使能总开关
-	P1_IMK |= GPIO_P13_IRQ_MASK(0x01);	// 打开P13的中断
-	P1_TRG0 &= ~GPIO_P13_TRG_SEL(0x03); // 配置P13为双边沿触发
+	// 配置P1_3为下拉，因为RF接收模块的输出在空闲时默认为低电平
+	// P1_PD |= GPIO_P13_PULL_PD(0x01);
+
+	// __SetIRQnIP(P1_IRQn, P1_IQn_CFG);	// 设置中断优先级
+	// __EnableIRQ(P1_IRQn);				// 使能中断
+	// IE_EA = 1;							// 使能总开关
+	// P1_IMK |= GPIO_P13_IRQ_MASK(0x01);	// 打开P13的中断
+	// P1_TRG0 &= ~GPIO_P13_TRG_SEL(0x03); // 配置P13为双边沿触发
 
 #endif // end ifdef CIRCUIT_BOARD
 
-	// ============================================================ //
+// ============================================================ //
+#if 0
 	// 配置定时器，用来记录RF接收到的高电平持续时间
 	__SetIRQnIP(TMR0_IRQn, TMR0_IQn_CFG); // 设置中断优先级（TMR0）
 
@@ -101,54 +104,54 @@ void rfin_init(void)
 										  // __EnableIRQ(TMR0_IRQn);			   // 使能中断
 
 	__DisableIRQ(TMR0_IRQn); // 禁用中断
+#endif
 }
 
-// TMR0中断服务函数
-void TIMR0_IRQHandler(void) interrupt TMR0_IRQn
-{
-	// 进入中断设置IP，不可删除
-	__IRQnIPnPush(TMR0_IRQn);
+// // TMR0中断服务函数
+// void TIMR0_IRQHandler(void) interrupt TMR0_IRQn
+// {
+// 	// 进入中断设置IP，不可删除
+// 	__IRQnIPnPush(TMR0_IRQn);
 
-	// ---------------- 用户函数处理 -------------------
+// 	// ---------------- 用户函数处理 -------------------
 
-	// 周期中断
-	if (TMR0_CONH & TMR_PRD_PND(0x1))
-	{
-		TMR0_CONH |= TMR_PRD_PND(0x1); // 清除pending
+// 	// 周期中断
+// 	if (TMR0_CONH & TMR_PRD_PND(0x1))
+// 	{
+// 		TMR0_CONH |= TMR_PRD_PND(0x1); // 清除pending
 
-		tmr0_cnt++; // 每80us或120us会加一次
+// 		tmr0_cnt++; // 每80us或120us会加一次
 
-		// P12 = ~P12;
-	}
+// 		// P12 = ~P12;
+// 	}
 
-	// 退出中断设置IP，不可删除
-	__IRQnIPnPop(TMR0_IRQn);
-}
+// 	// 退出中断设置IP，不可删除
+// 	__IRQnIPnPop(TMR0_IRQn);
+// }
 
 // 开启定时器TMR0，开始计时
-void tmr0_enable(void)
-{
-	// 重新给TMR0配置时钟
-	TMR0_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除定时器的时钟源配置寄存器
-	TMR0_CONL |= TMR_SOURCE_SEL(0x06);	  // 配置定时器的时钟源，使用系统时钟（约21MHz）
+// void tmr0_enable(void)
+// {
+// 	// 重新给TMR0配置时钟
+// 	TMR0_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除定时器的时钟源配置寄存器
+// 	TMR0_CONL |= TMR_SOURCE_SEL(0x06);	  // 配置定时器的时钟源，使用系统时钟（约21MHz）
 
-	__EnableIRQ(TMR0_IRQn); // 使能中断
-}
+// 	__EnableIRQ(TMR0_IRQn); // 使能中断
+// }
 
 // 关闭定时器0，清空计数值
-void tmr0_disable(void)
-{
-	// 不给定时器提供时钟，让它停止计数
-	TMR0_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除定时器的时钟源配置寄存器
-	TMR0_CONL |= TMR_SOURCE_SEL(0x05);	  // 配置定时器的时钟源，不用任何时钟
+// void tmr0_disable(void)
+// {
+// 	// 不给定时器提供时钟，让它停止计数
+// 	TMR0_CONL &= ~(TMR_SOURCE_SEL(0x07)); // 清除定时器的时钟源配置寄存器
+// 	TMR0_CONL |= TMR_SOURCE_SEL(0x05);	  // 配置定时器的时钟源，不用任何时钟
 
-	// 清除定时器的计数值
-	TMR0_CNTL = 0;
-	TMR0_CNTH = 0;
+// 	// 清除定时器的计数值
+// 	TMR0_CNTL = 0;
+// 	TMR0_CNTH = 0;
 
-	__DisableIRQ(TMR0_IRQn); // 关闭中断（不使能中断）
-}
-
+// 	__DisableIRQ(TMR0_IRQn); // 关闭中断（不使能中断）
+// }
 
 #ifdef DEVELOPMENT_BOARD
 // P0中断服务函数
@@ -249,9 +252,9 @@ void P0_IRQHandler(void) interrupt P0_IRQn
 }
 #endif // end ifdef DEVELOPMENT_BOARD
 
-
 #ifdef CIRCUIT_BOARD
 
+#if 0
 // P1中断服务函数
 void P1_IRQHandler(void) interrupt P1_IRQn
 {
@@ -348,6 +351,7 @@ void P1_IRQHandler(void) interrupt P1_IRQn
 	// 退出中断设置IP，不可删除
 	__IRQnIPnPop(P1_IRQn);
 }
+#endif
 
 #endif // end of #ifdef CIRCUIT_BOARD
 
@@ -423,27 +427,27 @@ void rf_recv_databuf(void)
 	{
 		// 如果成功接收了24位的数据，将其保存到缓冲区中
 		recv_rf_flag = 0;
-#ifdef DEVELOPMENT_BOARD
-		__DisableIRQ(P0_IRQn); // 禁用IO口中断，这时不能再从RF接收引脚接收新的数据
-#endif // end ifdef DEVELOPMENT_BOARD
-#ifdef CIRCUIT_BOARD
-		__DisableIRQ(P1_IRQn); // 禁用IO口中断，这时不能再从RF接收引脚接收新的数据
-#endif // end ifdef CIRCUIT_BOARD
+// #ifdef DEVELOPMENT_BOARD
+// 		__DisableIRQ(P0_IRQn); // 禁用IO口中断，这时不能再从RF接收引脚接收新的数据
+// #endif						   // end ifdef DEVELOPMENT_BOARD
+// #ifdef CIRCUIT_BOARD
+// 		__DisableIRQ(P1_IRQn);						// 禁用IO口中断，这时不能再从RF接收引脚接收新的数据
+// #endif												// end ifdef CIRCUIT_BOARD
 		rf_data_buf[rf_data_buf_index++] = rf_data; // 存放一次数据
 
 // send_keyval(rf_data & 0xFF);
-#ifdef DEVELOPMENT_BOARD
-		__EnableIRQ(P0_IRQn); // 使能IO口中断
-#endif // end ifdef DEVELOPMENT_BOARD
-#ifdef CIRCUIT_BOARD
-		__EnableIRQ(P1_IRQn); // 使能IO口中断
-#endif // end ifdef CIRCUIT_BOARD
+// #ifdef DEVELOPMENT_BOARD
+// 		__EnableIRQ(P0_IRQn); // 使能IO口中断
+// #endif						  // end ifdef DEVELOPMENT_BOARD
+// #ifdef CIRCUIT_BOARD
+// 		__EnableIRQ(P1_IRQn); // 使能IO口中断
+// #endif						  // end ifdef CIRCUIT_BOARD
 	}
 
 	if (rf_data_buf_index == sizeof(rf_data_buf) / sizeof(rf_data_buf[0]))
 	{
 		// 如果接收了n次数据
-		rf_data_buf_index = 0; // 数组（缓冲区）下标清零
+		rf_data_buf_index = 0;	  // 数组（缓冲区）下标清零
 		rf_data_buf_overflow = 1; // 数组（缓冲区）溢出标志置一
 
 #if 0
@@ -497,7 +501,7 @@ void rf_recv(void)
 		// 如果成功接收了24位的数据
 		recv_rf_flag = 0;
 
-		__DisableIRQ(P0_IRQn); // 禁用IO口中断（一定要关闭中断，否则会被新的RF信号打断，导致后面在逻辑分析仪看到的波形与预想的不一致）
+		// __DisableIRQ(P0_IRQn); // 禁用IO口中断（一定要关闭中断，否则会被新的RF信号打断，导致后面在逻辑分析仪看到的波形与预想的不一致）
 		send_keyval(rf_data);
 
 		// send_keyval(rf_data >> 16);
@@ -577,6 +581,6 @@ void rf_recv(void)
 		}
 
 #endif
-		__EnableIRQ(P0_IRQn); // 使能IO口中断
+		// __EnableIRQ(P0_IRQn); // 使能IO口中断
 	}
 }

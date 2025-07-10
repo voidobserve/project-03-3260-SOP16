@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 1   
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TK_SET
@@ -35,381 +35,382 @@ line level    source
   24          #include "rf_learn.h" // "—ßœ∞"£¨º«¬ºµÿ÷∑
   25          
   26          #include "flash.h" // µ•∆¨ª˙µƒflash≤Ÿ◊˜£¨≤‚ ‘”√
-  27          
+  27          #include "tmr2.h"
   28          #include "tmr3.h"
   29          
   30          #include "rf_scan.h"
   31          
-  32          #include "stimer0.h"
-  33          
-  34          /** @addtogroup Template_Project
-  35           * @{
-  36           */
-  37          
-  38          /* Private typedef -----------------------------------------------------------*/
-  39          /* Private define ------------------------------------------------------------*/
-  40          /* Private macro -------------------------------------------------------------*/
-  41          /* Private variables ---------------------------------------------------------*/
-  42          /* Private function prototypes -----------------------------------------------*/
-  43          /* Private functions ---------------------------------------------------------*/
-  44          /**
-  45           * @}
-  46           */
-  47          // ≈‰÷√“ª∏ˆ10msµƒ÷–∂œ
-  48          #define PEROID_VAL (SYSCLK / 128 / 100 - 1)
-  49          // ”√ªß≤ª‘ –Ì–ﬁ∏ƒ
-  50          volatile unsigned short xdata __tk_ch_data_0[TK_CH_USE] _at_(0x6000 + 0);
-  51          volatile unsigned short xdata __tk_ch_data_1[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 2);
-  52          volatile unsigned short xdata __tk_ch_data_2[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 4);
-  53          volatile unsigned short xdata __tk_ch_data_3[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 8);
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 2   
+  32          // #include "stimer0.h"
+  33          #include "timer0.h"
+  34          
+  35          /** @addtogroup Template_Project
+  36           * @{
+  37           */
+  38          
+  39          /* Private typedef -----------------------------------------------------------*/
+  40          /* Private define ------------------------------------------------------------*/
+  41          /* Private macro -------------------------------------------------------------*/
+  42          /* Private variables ---------------------------------------------------------*/
+  43          /* Private function prototypes -----------------------------------------------*/
+  44          /* Private functions ---------------------------------------------------------*/
+  45          /**
+  46           * @}
+  47           */
+  48          // ≈‰÷√“ª∏ˆ10msµƒ÷–∂œ
+  49          #define PEROID_VAL (SYSCLK / 128 / 100 - 1)
+  50          // ”√ªß≤ª‘ –Ì–ﬁ∏ƒ
+  51          volatile unsigned short xdata __tk_ch_data_0[TK_CH_USE] _at_(0x6000 + 0);
+  52          volatile unsigned short xdata __tk_ch_data_1[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 2);
+  53          volatile unsigned short xdata __tk_ch_data_2[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 4);
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 2   
 
-  54          volatile unsigned short xdata __tk_ch_data_4[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 10);
-  55          volatile unsigned short xdata __tk_ch_data_5[TK_CH_USE];
-  56          volatile unsigned short xdata __tk_ch_data_6[TK_CH_USE];
-  57          volatile unsigned short xdata __tk_ch_fth[TK_CH_USE];
-  58          volatile unsigned short xdata __tk_i_set[TK_CH_USE];
-  59          volatile unsigned char xdata __tk_update_cnt[TK_CH_USE];
-  60          volatile unsigned char xdata __tk_confirm_cnt[TK_CH_USE];
-  61          volatile unsigned char xdata __tk_leave_cnt[TK_CH_USE];
-  62          volatile unsigned char xdata __tk_ch_index[TK_CH_USE];
-  63          
-  64          // ”√ªß≤ª‘ –Ì–ﬁ∏ƒ
-  65          unsigned long code __tk_adjust_line = TK_DATA_LINE;
-  66          unsigned short code __tk_adjust_time = TK_ADJUST_TIME;
-  67          unsigned short code __tk_adjust_diff_valu = TK_MAX_DIFF_VALU;
-  68          unsigned char code __tk_adjust_en = TK_ADJUST_EN;
-  69          
-  70          unsigned short code __tk_valid_time = TK_VALID_TIME;
-  71          unsigned short code __tk_long_key_time = TK_LONG_KEY_TIME;
-  72          unsigned short code __tk_noise_value = TK_NOISE_VAL;
-  73          unsigned char code __tk_cs_en = TK_CS_EN;
-  74          unsigned char code __tk_tp_en = TK_TP_EN;
-  75          unsigned char code __tk_nm_num = TK_MU_CNT;
-  76          unsigned char code __tk_base_update_cnt = TK_UPDATE_CNT;
-  77          unsigned char code __tk_nm_cm_value = TK_NM_CM_CNT;
-  78          unsigned char code __tk_cm_valu = TK_CM_VALE;
-  79          unsigned char code __tk_use_num = TK_CH_USE;
-  80          
-  81          /*
-  82          **¥•√˛Õ®µ¿–≈œ¢±Ì
-  83          */
-  84          static u16 code TK_CH_EN_BUG[][2] =
-  85              {
-  86          #if TK0_CH_EN
-  87                  {
-  88                      0u,           // Õ®µ¿÷µ
-  89                      TK0_THR_DATA, // √≈œﬁ÷µ
-  90                  },
-  91          #endif
-  92          
-  93          #if TK1_CH_EN
+  54          volatile unsigned short xdata __tk_ch_data_3[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 8);
+  55          volatile unsigned short xdata __tk_ch_data_4[TK_CH_USE] _at_(0x6000 + TK_CH_USE * 10);
+  56          volatile unsigned short xdata __tk_ch_data_5[TK_CH_USE];
+  57          volatile unsigned short xdata __tk_ch_data_6[TK_CH_USE];
+  58          volatile unsigned short xdata __tk_ch_fth[TK_CH_USE];
+  59          volatile unsigned short xdata __tk_i_set[TK_CH_USE];
+  60          volatile unsigned char xdata __tk_update_cnt[TK_CH_USE];
+  61          volatile unsigned char xdata __tk_confirm_cnt[TK_CH_USE];
+  62          volatile unsigned char xdata __tk_leave_cnt[TK_CH_USE];
+  63          volatile unsigned char xdata __tk_ch_index[TK_CH_USE];
+  64          
+  65          // ”√ªß≤ª‘ –Ì–ﬁ∏ƒ
+  66          unsigned long code __tk_adjust_line = TK_DATA_LINE;
+  67          unsigned short code __tk_adjust_time = TK_ADJUST_TIME;
+  68          unsigned short code __tk_adjust_diff_valu = TK_MAX_DIFF_VALU;
+  69          unsigned char code __tk_adjust_en = TK_ADJUST_EN;
+  70          
+  71          unsigned short code __tk_valid_time = TK_VALID_TIME;
+  72          unsigned short code __tk_long_key_time = TK_LONG_KEY_TIME;
+  73          unsigned short code __tk_noise_value = TK_NOISE_VAL;
+  74          unsigned char code __tk_cs_en = TK_CS_EN;
+  75          unsigned char code __tk_tp_en = TK_TP_EN;
+  76          unsigned char code __tk_nm_num = TK_MU_CNT;
+  77          unsigned char code __tk_base_update_cnt = TK_UPDATE_CNT;
+  78          unsigned char code __tk_nm_cm_value = TK_NM_CM_CNT;
+  79          unsigned char code __tk_cm_valu = TK_CM_VALE;
+  80          unsigned char code __tk_use_num = TK_CH_USE;
+  81          
+  82          /*
+  83          **¥•√˛Õ®µ¿–≈œ¢±Ì
+  84          */
+  85          static u16 code TK_CH_EN_BUG[][2] =
+  86              {
+  87          #if TK0_CH_EN
+  88                  {
+  89                      0u,           // Õ®µ¿÷µ
+  90                      TK0_THR_DATA, // √≈œﬁ÷µ
+  91                  },
+  92          #endif
+  93          
+  94          #if TK1_CH_EN
                       {
                           1u,
                           TK1_THR_DATA,
                       },
               #endif
-  99          
- 100          #if TK2_CH_EN
- 101                  {
- 102                      2u,
- 103                      TK2_THR_DATA,
- 104                  },
- 105          #endif
- 106          
- 107          #if TK3_CH_EN
- 108                  {
- 109                      3u,
- 110                      TK3_THR_DATA,
- 111                  },
- 112          #endif
- 113          
- 114          #if TK4_CH_EN
-                      {
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 3   
+ 100          
+ 101          #if TK2_CH_EN
+ 102                  {
+ 103                      2u,
+ 104                      TK2_THR_DATA,
+ 105                  },
+ 106          #endif
+ 107          
+ 108          #if TK3_CH_EN
+ 109                  {
+ 110                      3u,
+ 111                      TK3_THR_DATA,
+ 112                  },
+ 113          #endif
+ 114          
+ 115          #if TK4_CH_EN
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 3   
 
+                      {
                           4u,
                           TK4_THR_DATA,
                       },
               #endif
- 120          
- 121          #if TK5_CH_EN
+ 121          
+ 122          #if TK5_CH_EN
                       {
                           5u,
                           TK5_THR_DATA,
                       },
               #endif
- 127          
- 128          #if TK6_CH_EN
+ 128          
+ 129          #if TK6_CH_EN
                       {
                           6u,
                           TK6_THR_DATA,
                       },
               #endif
- 134          
- 135          #if TK7_CH_EN
+ 135          
+ 136          #if TK7_CH_EN
                       {
                           7u,
                           TK7_THR_DATA,
                       },
               #endif
- 141          
- 142          #if TK8_CH_EN
+ 142          
+ 143          #if TK8_CH_EN
                       {
                           8u,
                           TK8_THR_DATA,
                       },
               #endif
- 148          
- 149          #if TK9_CH_EN
- 150                  {
- 151                      9u,
- 152                      TK9_THR_DATA,
- 153                  },
- 154          #endif
- 155          
- 156          #if TK10_CH_EN
- 157                  {
- 158                      10u,
- 159                      TK10_THR_DATA,
- 160                  },
- 161          #endif
- 162          
- 163          #if TK11_CH_EN
+ 149          
+ 150          #if TK9_CH_EN
+ 151                  {
+ 152                      9u,
+ 153                      TK9_THR_DATA,
+ 154                  },
+ 155          #endif
+ 156          
+ 157          #if TK10_CH_EN
+ 158                  {
+ 159                      10u,
+ 160                      TK10_THR_DATA,
+ 161                  },
+ 162          #endif
+ 163          
+ 164          #if TK11_CH_EN
                       {
                           11u,
                           TK11_THR_DATA,
                       },
               #endif
- 169          
- 170          #if TK12_CH_EN
+ 170          
+ 171          #if TK12_CH_EN
                       {
                           12u,
                           TK12_THR_DATA,
                       },
               #endif
- 176          
- 177          #if TK13_CH_EN
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 4   
+ 177          
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 4   
 
+ 178          #if TK13_CH_EN
                       {
                           13u,
                           TK13_THR_DATA,
                       },
               #endif
- 183          
- 184          #if TK14_CH_EN
+ 184          
+ 185          #if TK14_CH_EN
                       {
                           14u,
                           TK14_THR_DATA,
                       },
               #endif
- 190          
- 191          #if TK15_CH_EN
+ 191          
+ 192          #if TK15_CH_EN
                       {
                           15u,
                           TK15_THR_DATA,
                       },
               #endif
- 197          
- 198          #if TK16_CH_EN
+ 198          
+ 199          #if TK16_CH_EN
                       {
                           16u,
                           TK16_THR_DATA,
                       },
               #endif
- 204          
- 205          #if TK17_CH_EN
+ 205          
+ 206          #if TK17_CH_EN
                       {
                           17u,
                           TK17_THR_DATA,
                       },
               #endif
- 211          
- 212          #if TK18_CH_EN
+ 212          
+ 213          #if TK18_CH_EN
                       {
                           18u,
                           TK18_THR_DATA,
                       },
               #endif
- 218          
- 219          #if TK19_CH_EN
+ 219          
+ 220          #if TK19_CH_EN
                       {
                           19u,
                           TK19_THR_DATA,
                       },
               #endif
- 225          
- 226          #if TK20_CH_EN
+ 226          
+ 227          #if TK20_CH_EN
                       {
                           20u,
                           TK20_THR_DATA,
                       },
               #endif
- 232          
- 233          #if TK21_CH_EN
+ 233          
+ 234          #if TK21_CH_EN
                       {
                           21u,
                           TK21_THR_DATA,
                       },
               #endif
- 239          
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 5   
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 5   
 
- 240          #if TK22_CH_EN
+ 240          
+ 241          #if TK22_CH_EN
                       {
                           22u,
                           TK22_THR_DATA,
                       },
               #endif
- 246          
- 247          #if TK23_CH_EN
+ 247          
+ 248          #if TK23_CH_EN
                       {
                           23u,
                           TK23_THR_DATA,
                       },
               #endif
- 253          
- 254          #if TK24_CH_EN
- 255                  {
- 256                      24u,
- 257                      TK24_THR_DATA,
- 258                  },
- 259          #endif
- 260          
- 261          #if TK25_CH_EN
+ 254          
+ 255          #if TK24_CH_EN
+ 256                  {
+ 257                      24u,
+ 258                      TK24_THR_DATA,
+ 259                  },
+ 260          #endif
+ 261          
+ 262          #if TK25_CH_EN
                       {
                           25u,
                           TK25_THR_DATA,
                       },
               #endif
- 267          };
- 268          
- 269          /**
- 270           * @brief  Touchkey gpio init function
- 271           * @param  None
- 272           * @retval None
- 273           */
- 274          void tk_gpio_config(void)
- 275          {
- 276   1          u8 i = 0;
- 277   1      
- 278   1          for (i = 0; i < TK_CH_USE; i++)
- 279   1          {
- 280   2      
- 281   2              if (__tk_ch_index[i] < 8)
- 282   2              {
- 283   3                  if (__tk_ch_index[i] < 4)
- 284   3                  {
- 285   4                      P0_MD0 &= ~(0x3 << (__tk_ch_index[i] - 0) * 2);
- 286   4                      P0_MD0 |= (0x3 << (__tk_ch_index[i] - 0) * 2);
- 287   4                  }
- 288   3                  else
- 289   3                  {
- 290   4                      P0_MD1 &= ~(0x3 << (__tk_ch_index[i] - 4) * 2);
- 291   4                      P0_MD1 |= (0x3 << (__tk_ch_index[i] - 4) * 2);
- 292   4                  }
- 293   3              }
- 294   2              else if ((__tk_ch_index[i] >= 8) && (__tk_ch_index[i] < 16))
- 295   2              {
- 296   3                  if (__tk_ch_index[i] < 12)
- 297   3                  {
- 298   4                      P1_MD0 &= ~(0x3 << (__tk_ch_index[i] - 8) * 2);
- 299   4                      P1_MD0 |= (0x3 << (__tk_ch_index[i] - 8) * 2);
- 300   4                  }
- 301   3                  else
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 6   
+ 268          };
+ 269          
+ 270          /**
+ 271           * @brief  Touchkey gpio init function
+ 272           * @param  None
+ 273           * @retval None
+ 274           */
+ 275          void tk_gpio_config(void)
+ 276          {
+ 277   1          u8 i = 0;
+ 278   1      
+ 279   1          for (i = 0; i < TK_CH_USE; i++)
+ 280   1          {
+ 281   2      
+ 282   2              if (__tk_ch_index[i] < 8)
+ 283   2              {
+ 284   3                  if (__tk_ch_index[i] < 4)
+ 285   3                  {
+ 286   4                      P0_MD0 &= ~(0x3 << (__tk_ch_index[i] - 0) * 2);
+ 287   4                      P0_MD0 |= (0x3 << (__tk_ch_index[i] - 0) * 2);
+ 288   4                  }
+ 289   3                  else
+ 290   3                  {
+ 291   4                      P0_MD1 &= ~(0x3 << (__tk_ch_index[i] - 4) * 2);
+ 292   4                      P0_MD1 |= (0x3 << (__tk_ch_index[i] - 4) * 2);
+ 293   4                  }
+ 294   3              }
+ 295   2              else if ((__tk_ch_index[i] >= 8) && (__tk_ch_index[i] < 16))
+ 296   2              {
+ 297   3                  if (__tk_ch_index[i] < 12)
+ 298   3                  {
+ 299   4                      P1_MD0 &= ~(0x3 << (__tk_ch_index[i] - 8) * 2);
+ 300   4                      P1_MD0 |= (0x3 << (__tk_ch_index[i] - 8) * 2);
+ 301   4                  }
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 6   
 
- 302   3                  {
- 303   4                      P1_MD1 &= ~(0x3 << (__tk_ch_index[i] - 12) * 2);
- 304   4                      P1_MD1 |= (0x3 << (__tk_ch_index[i] - 12) * 2);
- 305   4                  }
- 306   3              }
- 307   2              else
- 308   2              {
- 309   3                  if (__tk_ch_index[i] < 20)
- 310   3                  {
- 311   4                      P2_MD0 &= ~(0x3 << (__tk_ch_index[i] - 16) * 2);
- 312   4                      P2_MD0 |= (0x3 << (__tk_ch_index[i] - 16) * 2);
- 313   4                  }
- 314   3                  else
- 315   3                  {
- 316   4                      P2_MD1 &= ~(0x3 << (__tk_ch_index[i] - 20) * 2);
- 317   4                      P2_MD1 |= (0x3 << (__tk_ch_index[i] - 20) * 2);
- 318   4                  }
- 319   3              }
- 320   2          }
- 321   1      }
- 322          
- 323          /**
- 324           * @brief  Touchkey_IRQHandler
- 325           * @param  none
- 326           * @retval None
- 327           */
- 328          void TK_IRQHandler(void) interrupt TK_IRQn
- 329          {
- 330   1          __IRQnIPnPush(TK_IRQn);
- 331   1          if (TK_CON2 & (0x1 << 6))
- 332   1          {
- 333   2              TK_CON2 |= (0x1 << 6);
- 334   2              __tk_handler();
- 335   2          }
- 336   1          __IRQnIPnPop(TK_IRQn);
- 337   1      }
- 338          
- 339          /**
- 340           * @brief  Touchkey Module init function
- 341           * @param  None
- 342           * @retval None
- 343           */
- 344          void tk_init(void)
- 345          {
- 346   1          IE_EA = 1;
- 347   1          IE3 |= (0x1 << 3);
- 348   1          IP6 |= (0x3 << 6);
- 349   1          CLK_CON2 |= (0x1 << 6);
- 350   1          __EnableIRQ(TK_IRQn);
- 351   1          TK_ACON0 = 0x3F;
- 352   1          TK_ACON1 = 0x4B;
- 353   1          TK_ACON3 = 0x30;
- 354   1          TK_PSRCNT = 0x2F;
- 355   1          TK_APRECHARGE = 0x4f;
- 356   1          TK_APREDISCH = 0x27;
- 357   1          TK_ACONVTIME = 0xA8;
- 358   1          TK_BASEDIV0 = 0x10;
- 359   1          TK_BASEDIV1 = 0x0;
- 360   1          TK_BASEDIV2 = 0x0;
- 361   1          TK_BASEDIV3 = 0x0;
- 362   1          TK_CHCON3 = 0xD0;
- 363   1          TK_CON0 = 0x4;
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 7   
+ 302   3                  else
+ 303   3                  {
+ 304   4                      P1_MD1 &= ~(0x3 << (__tk_ch_index[i] - 12) * 2);
+ 305   4                      P1_MD1 |= (0x3 << (__tk_ch_index[i] - 12) * 2);
+ 306   4                  }
+ 307   3              }
+ 308   2              else
+ 309   2              {
+ 310   3                  if (__tk_ch_index[i] < 20)
+ 311   3                  {
+ 312   4                      P2_MD0 &= ~(0x3 << (__tk_ch_index[i] - 16) * 2);
+ 313   4                      P2_MD0 |= (0x3 << (__tk_ch_index[i] - 16) * 2);
+ 314   4                  }
+ 315   3                  else
+ 316   3                  {
+ 317   4                      P2_MD1 &= ~(0x3 << (__tk_ch_index[i] - 20) * 2);
+ 318   4                      P2_MD1 |= (0x3 << (__tk_ch_index[i] - 20) * 2);
+ 319   4                  }
+ 320   3              }
+ 321   2          }
+ 322   1      }
+ 323          
+ 324          /**
+ 325           * @brief  Touchkey_IRQHandler
+ 326           * @param  none
+ 327           * @retval None
+ 328           */
+ 329          void TK_IRQHandler(void) interrupt TK_IRQn
+ 330          {
+ 331   1          __IRQnIPnPush(TK_IRQn);
+ 332   1          if (TK_CON2 & (0x1 << 6))
+ 333   1          {
+ 334   2              TK_CON2 |= (0x1 << 6);
+ 335   2              __tk_handler();
+ 336   2          }
+ 337   1          __IRQnIPnPop(TK_IRQn);
+ 338   1      }
+ 339          
+ 340          /**
+ 341           * @brief  Touchkey Module init function
+ 342           * @param  None
+ 343           * @retval None
+ 344           */
+ 345          void tk_init(void)
+ 346          {
+ 347   1          IE_EA = 1;
+ 348   1          IE3 |= (0x1 << 3);
+ 349   1          IP6 |= (0x3 << 6);
+ 350   1          CLK_CON2 |= (0x1 << 6);
+ 351   1          __EnableIRQ(TK_IRQn);
+ 352   1          TK_ACON0 = 0x3F;
+ 353   1          TK_ACON1 = 0x4B;
+ 354   1          TK_ACON3 = 0x30;
+ 355   1          TK_PSRCNT = 0x2F;
+ 356   1          TK_APRECHARGE = 0x4f;
+ 357   1          TK_APREDISCH = 0x27;
+ 358   1          TK_ACONVTIME = 0xA8;
+ 359   1          TK_BASEDIV0 = 0x10;
+ 360   1          TK_BASEDIV1 = 0x0;
+ 361   1          TK_BASEDIV2 = 0x0;
+ 362   1          TK_BASEDIV3 = 0x0;
+ 363   1          TK_CHCON3 = 0xD0;
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 7   
 
- 364   1          TK_CON1 = 0x1E;
- 365   1          TK_CON2 = 0x02;
- 366   1      }
- 367          
- 368          /**
- 369           * @brief  TIMR0_IRQHandler function
- 370           * @param  None
- 371           * @retval None
- 372           */
- 373          void WUT_IRQHandler(void) interrupt WUT_IRQn
- 374          {
- 375   1          // Ω¯»Î÷–∂œ…Ë÷√IP£¨≤ªø……æ≥˝
- 376   1          __IRQnIPnPush(WUT_IRQn);
- 377   1          // ÷‹∆⁄÷–∂œ
- 378   1          if (WUT_CONH & TMR_PRD_PND(0x1))
- 379   1          {
- 380   2              WUT_CONH |= TMR_PRD_PND(0x1); // «Â≥˝pending
- 381   2              __tk_ms_handler();            // ±’‘¥µƒ£¨≤ª÷™µ¿◊ˆ¡À ≤√¥£¨ø¥…œ»• «»√CPUΩ¯»ÎÀØ√ﬂ£¨µ•ŒªŒ™ms£® ÷≤·…œÀµ
+ 364   1          TK_CON0 = 0x4;
+ 365   1          TK_CON1 = 0x1E;
+ 366   1          TK_CON2 = 0x02;
+ 367   1      }
+ 368          
+ 369          /**
+ 370           * @brief  TIMR0_IRQHandler function
+ 371           * @param  None
+ 372           * @retval None
+ 373           */
+ 374          void WUT_IRQHandler(void) interrupt WUT_IRQn
+ 375          {
+ 376   1          // Ω¯»Î÷–∂œ…Ë÷√IP£¨≤ªø……æ≥˝
+ 377   1          __IRQnIPnPush(WUT_IRQn);
+ 378   1          // ÷‹∆⁄÷–∂œ
+ 379   1          if (WUT_CONH & TMR_PRD_PND(0x1))
+ 380   1          {
+ 381   2              WUT_CONH |= TMR_PRD_PND(0x1); // «Â≥˝pending
+ 382   2              __tk_ms_handler();            // ±’‘¥µƒ£¨≤ª÷™µ¿◊ˆ¡À ≤√¥£¨ø¥…œ»• «»√CPUΩ¯»ÎÀØ√ﬂ£¨µ•ŒªŒ™ms£® ÷≤·…œÀµ
              - «ÀØ√ﬂ300ms£©
- 382   2          }
- 383   1      
- 384   1          // ÕÀ≥ˆ÷–∂œ…Ë÷√IP£¨≤ªø……æ≥˝
- 385   1          __IRQnIPnPop(WUT_IRQn);
- 386   1      }
- 387          
- 388          #if 0
+ 383   2          }
+ 384   1      
+ 385   1          // ÕÀ≥ˆ÷–∂œ…Ë÷√IP£¨≤ªø……æ≥˝
+ 386   1          __IRQnIPnPop(WUT_IRQn);
+ 387   1      }
+ 388          
+ 389          #if 0
               /**
                * @brief  TIMER Module init function
                * @param  None
@@ -430,135 +431,139 @@ line level    source
              -µ÷µ°¢ƒ£ Ω
               }
               #endif // end void wut_init(void)
- 407          
- 408          /**
- 409           * @brief  Touchkey  parameter configuration function
- 410           *         ∞¥º¸≤Œ ˝≈‰÷√∫Ø ˝
- 411           *
- 412           * @param  None
- 413           * @retval None
- 414           */
- 415          void tk_param_init(void)
- 416          {
- 417   1          u8 i = 0;
- 418   1      
- 419   1          /* ∞¥º¸Õ®µ¿°¢µÁ¡˜°¢¡È√Ù∂»≥ı ºªØ */
- 420   1          for (i = 0; i < TK_CH_USE; i++)
- 421   1          {
- 422   2              __tk_ch_index[i] = (u8)(TK_CH_EN_BUG[i][0] & 0xff); // ¥Ê∑≈∞¥º¸Õ®µ¿–≈œ¢
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 8   
+ 408          
+ 409          /**
+ 410           * @brief  Touchkey  parameter configuration function
+ 411           *         ∞¥º¸≤Œ ˝≈‰÷√∫Ø ˝
+ 412           *
+ 413           * @param  None
+ 414           * @retval None
+ 415           */
+ 416          void tk_param_init(void)
+ 417          {
+ 418   1          u8 i = 0;
+ 419   1      
+ 420   1          /* ∞¥º¸Õ®µ¿°¢µÁ¡˜°¢¡È√Ù∂»≥ı ºªØ */
+ 421   1          for (i = 0; i < TK_CH_USE; i++)
+ 422   1          {
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 8   
 
- 423   2              __tk_ch_fth[i] = TK_CH_EN_BUG[i][1];                // ¥Ê∑≈∞¥º¸Õ®µ¿–≈œ¢
- 424   2              __tk_i_set[i] = TK_CURR_GEAR;                       // ≥‰µÁµÁ¡˜
- 425   2              __tk_ch_en |= (1UL << __tk_ch_index[i]);            // ∞¥º¸Õ®µ¿ πƒ‹
- 426   2          }
- 427   1      
- 428   1          /* ∞¥º¸IO≈‰÷√∫Ø ˝ */
- 429   1          tk_gpio_config();
- 430   1      
- 431   1          /* ø‚∫Ø ˝≥ı ºªØ */
- 432   1          __tk_lib_init(); // µ˜”√¡Àø‚£®±’‘¥£©
- 433   1      
- 434   1          /* ∞¥º¸ƒ£øÈ≈‰÷√∫Ø ˝ */
- 435   1          tk_init();
- 436   1      
- 437   1          /* ∂® ±∆˜≈‰÷√∫Ø ˝ */
- 438   1          // wut_init();
- 439   1      }
- 440          
- 441          /**
- 442           * @brief  Touchkey  Circular execution function
- 443           * @param  None
- 444           * @retval None
- 445           */
- 446          void tk_handle(void)
- 447          {
- 448   1          // u32 tmp = 0; // ¡Ÿ ±±‰¡ø£¨≤‚ ‘”√
- 449   1      
- 450   1          /* ”√ªß¥˙¬Î≥ı ºªØΩ”ø⁄ */
- 451   1          user_init();
+ 423   2              __tk_ch_index[i] = (u8)(TK_CH_EN_BUG[i][0] & 0xff); // ¥Ê∑≈∞¥º¸Õ®µ¿–≈œ¢
+ 424   2              __tk_ch_fth[i] = TK_CH_EN_BUG[i][1];                // ¥Ê∑≈∞¥º¸Õ®µ¿–≈œ¢
+ 425   2              __tk_i_set[i] = TK_CURR_GEAR;                       // ≥‰µÁµÁ¡˜
+ 426   2              __tk_ch_en |= (1UL << __tk_ch_index[i]);            // ∞¥º¸Õ®µ¿ πƒ‹
+ 427   2          }
+ 428   1      
+ 429   1          /* ∞¥º¸IO≈‰÷√∫Ø ˝ */
+ 430   1          tk_gpio_config();
+ 431   1      
+ 432   1          /* ø‚∫Ø ˝≥ı ºªØ */
+ 433   1          __tk_lib_init(); // µ˜”√¡Àø‚£®±’‘¥£©
+ 434   1      
+ 435   1          /* ∞¥º¸ƒ£øÈ≈‰÷√∫Ø ˝ */
+ 436   1          tk_init();
+ 437   1      
+ 438   1          /* ∂® ±∆˜≈‰÷√∫Ø ˝ */
+ 439   1          // wut_init();
+ 440   1      }
+ 441          
+ 442          /**
+ 443           * @brief  Touchkey  Circular execution function
+ 444           * @param  None
+ 445           * @retval None
+ 446           */
+ 447          void tk_handle(void)
+ 448          {
+ 449   1          /* ”√ªß¥˙¬Î≥ı ºªØΩ”ø⁄ */
+ 450   1          // user_init();
+ 451   1          // led_init(); // ≥ı ºªØLEDœ‡πÿµƒ“˝Ω≈
  452   1      
- 453   1          /* µ˜ ‘¥Æø⁄≥ı ºªØ */
- 454   1      #if TK_DEBUG_EN
+ 453   1          timer0_config();
+ 454   1          rfin_init(); // RF315Ω” ’“˝Ω≈≥ı ºªØ£¨’‚¿Ô“≤≥ı ºªØ¡Àtmr0
+ 455   1      
+ 456   1          // p12_output_config(); // ≤‚ ‘”√£¨P12≥ı ºªØ£¨≈‰÷√Œ™ ‰≥ˆƒ£ Ω
+ 457   1      
+ 458   1          send_keyval_pin_init();   // ≥ı ºªØº¸÷µµƒ∑¢ÀÕ“˝Ω≈
+ 459   1          send_keyval_timer_init(); // ≥ı ºªØ∑¢ÀÕº¸÷µµƒ“˝Ω≈À˘ π”√µΩµƒ∂® ±∆˜£¨∂® ±∆˜ƒ¨»œπÿ±’
+ 460   1      
+ 461   1          // tmr0_enable(); // ¥Úø™≤…ºØRF–≈∫≈µƒ∂® ±∆˜
+ 462   1          // tmr1_enable(); // ¥Úø™∑¢ÀÕº¸÷µµƒ“˝Ω≈À˘ π”√µΩµƒ∂® ±∆˜£¨≤‚ ‘”√£¨ø¥ø¥∂® ±∆˜÷–∂œ «∑Ò∞¥≈‰÷√µƒ ±º‰¥•∑¢
+ 463   1      
+ 464   1          tmr2_config(); // …œµÁ5sƒ⁄µƒ"—ßœ∞"À˘ π”√µƒ∂® ±∆˜
+ 465   1          tmr3_config(); // ≈‰÷√∂® ±∆˜£¨√ø10ms≤˙…˙“ª¥Œ÷–∂œ£¨∂‘”¶µƒº∆ ˝÷µ+1£¨”√¿¥≈–∂œ∞¥º¸µƒ∂Ã∞¥°¢≥§∞¥∫Õ≥÷–¯
+ 466   1          tmr4_config(); // ¥Úø™ ∂±“£øÿ∆˜À´ª˜À˘–Ë“™µƒ∂® ±∆˜
+ 467   1      
+ 468   1          // stimer0_config(); // 1ms∂® ±∆˜
+ 469   1      
+ 470   1          // p01_output_config(); // ø™∑¢∞ÂLED6∂‘”¶µƒ“˝Ω≈≥ı ºªØ
+ 471   1          // p26_output_config(); // ø™∑¢∞ÂLED7∂‘”¶µƒ“˝Ω≈≥ı ºªØ
+ 472   1      
+ 473   1      #if USE_MY_DEBUG
+                  uart1_config();
+              #endif //     #if USE_MY_DEBUG
+ 476   1      
+ 477   1          /* µ˜ ‘¥Æø⁄≥ı ºªØ */
+ 478   1      #if TK_DEBUG_EN
                   debug_gpio_config();
                   debug_uart_config();
               #endif
- 458   1      
- 459   1          /* ∞¥º¸≥ı ºªØ */
- 460   1          tk_param_init();
- 461   1      
- 462   1          // …œµÁ∫Û5√Îƒ⁄Ω¯––—ßœ∞£¨Œﬁ¬€”–√ª”–∆˜º˛”Îµ•∆¨ª˙≈‰∂‘£¨∂ºÕÀ≥ˆ
- 463   1          rf_learn();
- 464   1      
- 465   1      #if USE_MY_DEBUG
+ 482   1      
+ 483   1          /* ∞¥º¸≥ı ºªØ */
+ 484   1          tk_param_init();
+C51 COMPILER V9.60.7.0   TK_SET                                                            07/10/2025 11:57:30 PAGE 9   
+
+ 485   1      
+ 486   1          // …œµÁ∫Û5√Îƒ⁄Ω¯––—ßœ∞£¨Œﬁ¬€”–√ª”–∆˜º˛”Îµ•∆¨ª˙≈‰∂‘£¨∂ºÕÀ≥ˆ
+ 487   1          rf_learn();
+ 488   1      
+ 489   1      #if USE_MY_DEBUG
                   printf("sys reset\n"); // ±Ì æœµÕ≥∏’…œµÁ / ±ª∏¥Œª
               #endif                     //   #if USE_MY_DEBUG
- 468   1      
- 469   1          /* œµÕ≥÷˜—≠ª∑ */
- 470   1          while (1)
- 471   1          {
- 472   2              /* ∞¥º¸…®√Ë∫Ø ˝ */
- 473   2              __tk_scan(); //  π”√¡Àø‚¿Ô√ÊµƒΩ”ø⁄£®±’‘¥ø‚£©
- 474   2      
- 475   2              /* ”√ªß—≠ª∑…®√Ë∫Ø ˝Ω”ø⁄ */
- 476   2              user_handle();
- 477   2      
- 478   2              rf_scan(); // …®√Ë «∑Ò”–RF–≈∫≈£¨“‘º∞◊ˆœ‡”¶µƒ¥¶¿Ì
- 479   2      
- 480   2              if (flag_is_reinitialize_touch)
- 481   2              {
- 482   3                  flag_is_reinitialize_touch = 0;
- 483   3                  /* ∞¥º¸≥ı ºªØ */
- 484   3                  tk_param_init();
-C51 COMPILER V9.60.7.0   TK_SET                                                            07/08/2025 17:28:58 PAGE 9   
-
- 485   3              }
- 486   2      
- 487   2              // show_addr_info_save_by_type();
- 488   2              // show_addr_info_save_by_nums();
- 489   2      
- 490   2              // delay_ms(500);
- 491   2      
- 492   2              // ≤‚ ‘Õ®π˝
- 493   2              // LED6 = 1;
- 494   2              // delay_ms(500);
- 495   2              // LED6 = 0;
- 496   2              // delay_ms(500);
- 497   2      
- 498   2              // ≤‚ ‘Õ®π˝
- 499   2              // LED7 = 1;
- 500   2              // delay_ms(500);
- 501   2              // LED7 = 0;
- 502   2              // delay_ms(500);
+ 492   1      
+ 493   1          // ≤‚ ‘”√µΩµƒ“˝Ω≈£∫
+ 494   1          // P1_MD1 &= ~GPIO_P15_MODE_SEL(0x03);
+ 495   1          // P1_MD1 |= GPIO_P15_MODE_SEL(0x01);
+ 496   1          // FOUT_S15 = GPIO_FOUT_AF_FUNC;
+ 497   1      
+ 498   1          /* œµÕ≥÷˜—≠ª∑ */
+ 499   1          while (1)
+ 500   1          {
+ 501   2              /* ∞¥º¸…®√Ë∫Ø ˝ */
+ 502   2              __tk_scan(); //  π”√¡Àø‚¿Ô√ÊµƒΩ”ø⁄£®±’‘¥ø‚£©
  503   2      
- 504   2              // P12 = ~P12;
- 505   2      
- 506   2              // flash_erase_sector(FLASH_DEVICE_START_ADDR);
- 507   2              // rf_learn();
+ 504   2              /* ”√ªß—≠ª∑…®√Ë∫Ø ˝Ω”ø⁄ */
+ 505   2              user_handle();
+ 506   2      
+ 507   2              rf_scan(); // …®√Ë «∑Ò”–RF–≈∫≈£¨“‘º∞◊ˆœ‡”¶µƒ¥¶¿Ì
  508   2      
- 509   2              // rf_recv();
- 510   2      
- 511   2              // rf_recv_databuf();
- 512   2      
- 513   2              /* µ˜ ‘¥Ú”°∫Ø ˝£¨»Áπ˚≤ª–Ë“™¥Ú”°‘Ú‘⁄tk_conf.h÷–Ω´TK_DEBUG_EN…Ë÷√Œ™0 */
- 514   2      #if TK_DEBUG_EN
-                      if ((__tk_ms_flag >= 1) && (__tk_adjust_done_peng))
-                      {
-                          __tk_ms_flag = 0;
-                          tk_debug_func();
-                      }
-              #endif
- 521   2      
- 522   2              /* Œππ∑ :Ω®“È≤ª“™πÿ±’ø¥√≈π∑£¨ƒ¨»œ2s∏¥Œª*/
- 523   2              WDT_KEY = WDT_KEY_VAL(0xAA);
- 524   2          }
- 525   1      }
- 526          
- 527          /*************************** (C) COPYRIGHT 2022 TAIXIN-IC ***** END OF FILE *****/
+ 509   2              if (flag_is_reinitialize_touch)
+ 510   2              {
+ 511   3                  flag_is_reinitialize_touch = 0;
+ 512   3                  /* ∞¥º¸≥ı ºªØ */
+ 513   3                  tk_param_init();
+ 514   3      
+ 515   3                  // P15 = ~P15;
+ 516   3      
+ 517   3                  // printf("touch reinitialize\n");
+ 518   3              }
+ 519   2      
+ 520   2              // if (recv_rf_flag)
+ 521   2              // {
+ 522   2              //     recv_rf_flag = 0;
+ 523   2      
+ 524   2              //     printf("recv data 0x %lx\n", rf_data);
+ 525   2              // }
+ 526   2      
+ 527   2              /* Œππ∑ :Ω®“È≤ª“™πÿ±’ø¥√≈π∑£¨ƒ¨»œ2s∏¥Œª*/
+ 528   2              WDT_KEY = WDT_KEY_VAL(0xAA);
+ 529   2          }
+ 530   1      }
+ 531          
+ 532          /*************************** (C) COPYRIGHT 2022 TAIXIN-IC ***** END OF FILE *****/
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    735    ----
+   CODE SIZE        =    753    ----
    CONSTANT SIZE    =     46    ----
    XDATA SIZE       =     72    ----
    PDATA SIZE       =   ----    ----

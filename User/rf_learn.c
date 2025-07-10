@@ -5,7 +5,8 @@
 #include "send_key.h" // 发送键值，测试时用
 #include "tmr2.h"     // 使用定时器TMR2来实现5s延时
 
-#include "stimer0.h"
+#include "timer0.h"
+// #include "stimer0.h"
 
 #include <stdlib.h> // 使用了NULL
 

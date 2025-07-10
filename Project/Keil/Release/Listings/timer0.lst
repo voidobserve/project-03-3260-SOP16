@@ -1,0 +1,242 @@
+C51 COMPILER V9.60.7.0   TIMER0                                                            07/10/2025 11:57:32 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TIMER0
+OBJECT MODULE PLACED IN .\Release\Objects\timer0.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\..\User\timer0.c LARGE OPTIMIZE(9,SIZE) BROWSE INTVECTOR(0X000C) INCD
+                    -IR(..\..\Libraries\Include;..\..\User;..\..\User\lib) INTERVAL(3) DEBUG OBJECTEXTEND PRINT(.\Release\Listings\timer0.lst
+                    -) OBJECT(.\Release\Objects\timer0.obj)
+
+line level    source
+
+   1          #include "timer0.h"
+   2          #include "my_config.h"
+   3          #include "rf_recv.h"
+   4          
+   5          // 触摸按键模块初始化的倒计时
+   6          static volatile u32 touch_init_cnt = 0;
+   7          
+   8          volatile bit flag_is_reinitialize_touch = 0; // 是否需要重新初始化触摸按键
+   9          
+  10          // 清零触摸按键模块初始化的倒计时
+  11          void touch_cnt_down_clear(void)
+  12          {
+  13   1          touch_init_cnt = 0;
+  14   1          flag_is_reinitialize_touch = 0;
+  15   1      }
+  16          
+  17          /**
+  18           * @brief 配置定时器TMR0，定时器默认关闭
+  19           */
+  20          void timer0_config(void)
+  21          {
+  22   1          __EnableIRQ(TMR0_IRQn); // 使能timer0中断
+  23   1          IE_EA = 1;              // 使能总中断
+  24   1      
+  25   1      #define PEROID_VAL (SYSCLK / 1 / 10000 - 1) // 周期值=系统时钟/分频/频率 - 1
+  26   1      
+  27   1          TMR_ALLCON = TMR0_CNT_CLR(0x1);                        // 清除计数值
+  28   1          TMR0_PRH = TMR_PERIOD_VAL_H((PEROID_VAL >> 8) & 0xFF); // 周期值
+  29   1          TMR0_PRL = TMR_PERIOD_VAL_L((PEROID_VAL >> 0) & 0xFF);
+  30   1          TMR0_CONH = TMR_PRD_PND(0x1) | TMR_PRD_IRQ_EN(0x1);                           // 计数等于周期时
+             -允许发生中断
+  31   1          TMR0_CONL = TMR_SOURCE_SEL(0x7) | TMR_PRESCALE_SEL(0x00) | TMR_MODE_SEL(0x1); // 选择系统时钟，
+             -1分频，计数模式
+  32   1      }
+  33          
+  34          // TMR0中断服务函数
+  35          void TIMR0_IRQHandler(void) interrupt TMR0_IRQn
+  36          {
+  37   1          // 进入中断设置IP，不可删除
+  38   1          __IRQnIPnPush(TMR0_IRQn);
+  39   1      
+  40   1          // ---------------- 用户函数处理 -------------------
+  41   1      
+  42   1          // 周期中断
+  43   1          if (TMR0_CONH & TMR_PRD_PND(0x1))
+  44   1          {
+  45   2              TMR0_CONH |= TMR_PRD_PND(0x1); // 清除pending
+  46   2      
+  47   2      #if 1 // rf信号接收 （100us调用一次）
+  48   2              {
+  49   3                  static volatile u8 rf_bit_cnt;            // RF信号接收的数据位计数值
+  50   3                  static volatile u32 __rf_data;            // 定时器中断使用的接收缓冲区，避免�
+             -��接覆盖全局的数据接收缓冲区
+C51 COMPILER V9.60.7.0   TIMER0                                                            07/10/2025 11:57:32 PAGE 2   
+
+  51   3                  static volatile u8 flag_is_enable_recv;   // 是否使能接收的标志位，要接收到 5ms
+             -+ 的低电平才开始接收
+  52   3                  static volatile u8 __flag_is_recved_data; // 表示中断服务函数接收到了rf数据
+  53   3      
+  54   3                  static volatile u8 low_level_cnt;  // RF信号低电平计数值
+  55   3                  static volatile u8 high_level_cnt; // RF信号高电平计数值
+  56   3      
+  57   3                  // 在定时器 中扫描端口电平
+  58   3                  if (0 == RFIN_PIN)
+  59   3                  {
+  60   4                      // 如果RF接收引脚为低电平，记录低电平的持续时间
+  61   4                      low_level_cnt++;
+  62   4      
+  63   4                      /*
+  64   4                          下面的判断条件是避免部分遥控器或接收模块只发送24位数据，最
+             -后不拉高电平的情况
+  65   4                      */
+  66   4                      if (low_level_cnt >= 30 && rf_bit_cnt == 23) // 如果低电平大于3000us，并且已经
+             -接收了23位数据
+  67   4                      {
+  68   5                          if (high_level_cnt >= 6 && high_level_cnt < 20)
+  69   5                          {
+  70   6                              __rf_data |= 0x01;
+  71   6                          }
+  72   5                          else if (high_level_cnt >= 1 && high_level_cnt < 6)
+  73   5                          {
+  74   6                          }
+  75   5      
+  76   5                          __flag_is_recved_data = 1; // 接收完成标志位置一
+  77   5                          flag_is_enable_recv = 0;
+  78   5                      }
+  79   4                  }
+  80   3                  else
+  81   3                  {
+  82   4                      if (low_level_cnt > 0)
+  83   4                      {
+  84   5                          // 如果之前接收到了低电平信号，现在遇到了高电平，判断是否�
+             -�收完成了一位数据
+  85   5                          if (low_level_cnt > 50)
+  86   5                          {
+  87   6                              // 如果低电平持续时间大于50 * 100us（5ms），准备下一次再读取
+             -有效信号
+  88   6                              __rf_data = 0;  // 清除接收的数据帧
+  89   6                              rf_bit_cnt = 0; // 清除用来记录接收的数据位数
+  90   6      
+  91   6                              flag_is_enable_recv = 1;
+  92   6                          }
+  93   5                          else if (flag_is_enable_recv &&
+  94   5                                   low_level_cnt >= 2 && low_level_cnt < 7 &&
+  95   5                                   high_level_cnt >= 6 && high_level_cnt < 20)
+  96   5                          {
+  97   6                              // 如果低电平持续时间在360us左右，高电平持续时间在760us左右
+             -，说明接收到了1
+  98   6                              __rf_data |= 0x01;
+  99   6                              rf_bit_cnt++;
+ 100   6                              if (rf_bit_cnt != 24)
+ 101   6                              {
+ 102   7                                  __rf_data <<= 1; // 用于存放接收24位数据的变量左移一位
+ 103   7                              }
+ 104   6                          }
+ 105   5                          else if (flag_is_enable_recv &&
+ 106   5                                   low_level_cnt >= 7 && low_level_cnt < 20 &&
+C51 COMPILER V9.60.7.0   TIMER0                                                            07/10/2025 11:57:32 PAGE 3   
+
+ 107   5                                   high_level_cnt >= 1 && high_level_cnt < 6)
+ 108   5                          {
+ 109   6                              // 如果低电平持续时间在840us左右，高电平持续时间在360us左右
+             -，说明接收到了0
+ 110   6                              __rf_data &= ~1;
+ 111   6                              rf_bit_cnt++;
+ 112   6                              if (rf_bit_cnt != 24)
+ 113   6                              {
+ 114   7                                  __rf_data <<= 1; // 用于存放接收24位数据的变量左移一位
+ 115   7                              }
+ 116   6                          }
+ 117   5                          else
+ 118   5                          {
+ 119   6                              // 如果低电平持续时间不符合0和1的判断条件，说明此时没有�
+             -�收到信号
+ 120   6                              __rf_data = 0;
+ 121   6                              rf_bit_cnt = 0;
+ 122   6                              flag_is_enable_recv = 0;
+ 123   6                          }
+ 124   5      
+ 125   5                          low_level_cnt = 0; // 无论是否接收到一位数据，遇到高电平时，先清�
+             -��之前的计数值
+ 126   5                          high_level_cnt = 0;
+ 127   5      
+ 128   5                          if (24 == rf_bit_cnt)
+ 129   5                          {
+ 130   6                              // 如果接收成了24位的数据
+ 131   6                              __flag_is_recved_data = 1; // 接收完成标志位置一
+ 132   6                              flag_is_enable_recv = 0;
+ 133   6                          }
+ 134   5                      }
+ 135   4                      else
+ 136   4                      {
+ 137   5                          // 如果接收到高电平后，低电平的计数为0
+ 138   5      
+ 139   5                          if (0 == flag_is_enable_recv)
+ 140   5                          {
+ 141   6                              __rf_data = 0;
+ 142   6                              rf_bit_cnt = 0;
+ 143   6                              flag_is_enable_recv = 0;
+ 144   6                          }
+ 145   5                      }
+ 146   4      
+ 147   4                      // 如果RF接收引脚为高电平，记录高电平的持续时间
+ 148   4                      high_level_cnt++;
+ 149   4                  }
+ 150   3      
+ 151   3                  if (__flag_is_recved_data) //
+ 152   3                  {
+ 153   4                      rf_bit_cnt = 0;
+ 154   4                      __flag_is_recved_data = 0;
+ 155   4                      low_level_cnt = 0;
+ 156   4                      high_level_cnt = 0;
+ 157   4      
+ 158   4                      // if (rf_data != 0)
+ 159   4                      // if (0 == flag_is_recved_rf_data) /* 如果之前未接收到数据 或是 已经处理�
+             -��上一次接收到的数据 */
+ 160   4                      {
+ 161   5                          // 现在改为只要收到新的数据，就覆盖rf_data
+ 162   5                          rf_data = __rf_data;
+ 163   5                          recv_rf_flag = 1;
+ 164   5                      }
+C51 COMPILER V9.60.7.0   TIMER0                                                            07/10/2025 11:57:32 PAGE 4   
+
+ 165   4                      // else
+ 166   4                      // {
+ 167   4                      //     __rf_data = 0;
+ 168   4                      // }
+ 169   4                  }
+ 170   3              }
+ 171   2      #endif // rf信号接收 （100us调用一次）
+ 172   2      
+ 173   2              {
+ 174   3                  static u8 cnt = 0;
+ 175   3                  cnt++;
+ 176   3                  if (cnt >= 10) // 10 * 100us，1ms进入一次
+ 177   3                  {
+ 178   4                      cnt = 0;
+ 179   4      
+ 180   4                      if (touch_init_cnt < 4294967296 - 1) // 防止计数溢出 （2^32）
+ 181   4                      {
+ 182   5                          touch_init_cnt++;
+ 183   5      
+ 184   5                          if (touch_init_cnt >= 5000)
+ 185   5                          {
+ 186   6                              touch_init_cnt = 0;
+ 187   6                              flag_is_reinitialize_touch = 1;
+ 188   6      
+ 189   6                              // P15 = ~P15; // 测试用
+ 190   6                          }
+ 191   5                      }
+ 192   4                  }
+ 193   3              }
+ 194   2          }
+ 195   1      
+ 196   1          // 退出中断设置IP，不可删除
+ 197   1          __IRQnIPnPop(TMR0_IRQn);
+ 198   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    543    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     14    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

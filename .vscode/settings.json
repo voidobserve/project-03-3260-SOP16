@@ -4,6 +4,8 @@
         "rf_recv.h": "c",
         "include.h": "c",
         "tk_user.h": "c",
-        "tk_set.h": "c"
+        "tk_set.h": "c",
+        "my_config.h": "c",
+        "timer0.h": "c"
     }
 }

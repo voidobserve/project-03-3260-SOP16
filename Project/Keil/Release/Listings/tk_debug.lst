@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/08/2025 16:48:51 PAGE 1   
+C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/10/2025 11:57:30 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TK_DEBUG
@@ -62,7 +62,7 @@ line level    source
                 P2_MD1 &= ~(GPIO_P27_MODE_SEL(0x03)); //  
                 P2_MD1 |= (GPIO_P27_MODE_SEL(0x01)); //  
                 FOUT_S27 = GPIO_FOUT_UART1_TX;         // uart1_tx 功能 pin 脚选择
-C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/08/2025 16:48:51 PAGE 2   
+C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/10/2025 11:57:30 PAGE 2   
 
               
                 UART1_BAUD1 = (USER_UART1_BAUD >> 8) & 0xFF; // 配置波特率高八位
@@ -126,7 +126,7 @@ line level    source
                 static u8 xdata cur_index = 0;
                 static u8 xdata pack_index = 0;
                 static u16 xdata i_set_cnt = 0;
-C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/08/2025 16:48:51 PAGE 3   
+C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/10/2025 11:57:30 PAGE 3   
 
                 u8 send_cnt = 0;
               
@@ -190,7 +190,7 @@ line level    source
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =   ----    ----
    CONSTANT SIZE    =   ----    ----
-C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/08/2025 16:48:51 PAGE 4   
+C51 COMPILER V9.60.7.0   TK_DEBUG                                                          07/10/2025 11:57:30 PAGE 4   
 
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

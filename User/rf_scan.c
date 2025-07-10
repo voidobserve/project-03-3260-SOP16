@@ -8,6 +8,8 @@
 
 #include "key_conversion.h" // 将键值转换成功能值（功能值唯一）
 
+#include "timer0.h"
+
 // 对RF信号接收引脚进行一次扫描，如果有信号，则进行相应的处理
 void rf_scan(void)
 {
@@ -35,6 +37,8 @@ void rf_scan(void)
     {
         // 收到遥控器数据，清空触摸按键模块初始化的倒计时
         touch_cnt_down_clear();
+
+        // printf("rf_data %lx\n", rf_data);
     }
 
     if (recv_rf_flag && 0 == timer_total_cnt && 0 == press_flag)

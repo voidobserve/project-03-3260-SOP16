@@ -14,7 +14,7 @@
 ".\Release\Objects\tmr2.obj",
 ".\Release\Objects\key_conversion.obj",
 ".\Release\Objects\tmr4.obj",
-".\Release\Objects\stimer0.obj",
+".\Release\Objects\timer0.obj",
 "..\..\User\lib\tk_simplify_algorithm_V1.0.0.LIB" 
 TO ".\Release\Objects\Demo" 
 PRINT(".\Release\Listings\Demo.m51") RAMSIZE(256) 

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   TMR4                                                              07/08/2025 16:48:52 PAGE 1   
+C51 COMPILER V9.60.7.0   TMR4                                                              07/10/2025 11:57:32 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE TMR4
@@ -62,7 +62,7 @@ line level    source
   51   2      
   52   2              // P24 = ~P24; // 测试用，看看中断触发时间是否一致
   53   2          }
-C51 COMPILER V9.60.7.0   TMR4                                                              07/08/2025 16:48:52 PAGE 2   
+C51 COMPILER V9.60.7.0   TMR4                                                              07/10/2025 11:57:32 PAGE 2   
 
   54   1      
   55   1          // 退出中断设置IP，不可删除

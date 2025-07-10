@@ -24,12 +24,13 @@
 #include "rf_learn.h" // "学习"，记录地址
 
 #include "flash.h" // 单片机的flash操作，测试用
-
+#include "tmr2.h"
 #include "tmr3.h"
 
 #include "rf_scan.h"
 
-#include "stimer0.h"
+// #include "stimer0.h"
+#include "timer0.h"
 
 /** @addtogroup Template_Project
  * @{
@@ -445,10 +446,33 @@ void tk_param_init(void)
  */
 void tk_handle(void)
 {
-    // u32 tmp = 0; // 临时变量，测试用
-
     /* 用户代码初始化接口 */
-    user_init();
+    // user_init();
+    // led_init(); // 初始化LED相关的引脚
+
+    timer0_config();
+    rfin_init(); // RF315接收引脚初始化，这里也初始化了tmr0
+
+    // p12_output_config(); // 测试用，P12初始化，配置为输出模式
+
+    send_keyval_pin_init();   // 初始化键值的发送引脚
+    send_keyval_timer_init(); // 初始化发送键值的引脚所使用到的定时器，定时器默认关闭
+
+    // tmr0_enable(); // 打开采集RF信号的定时器
+    // tmr1_enable(); // 打开发送键值的引脚所使用到的定时器，测试用，看看定时器中断是否按配置的时间触发
+
+    tmr2_config(); // 上电5s内的"学习"所使用的定时器
+    tmr3_config(); // 配置定时器，每10ms产生一次中断，对应的计数值+1，用来判断按键的短按、长按和持续
+    tmr4_config(); // 打开识别遥控器双击所需要的定时器
+
+    // stimer0_config(); // 1ms定时器
+
+    // p01_output_config(); // 开发板LED6对应的引脚初始化
+    // p26_output_config(); // 开发板LED7对应的引脚初始化
+
+#if USE_MY_DEBUG
+    uart1_config();
+#endif //     #if USE_MY_DEBUG
 
     /* 调试串口初始化 */
 #if TK_DEBUG_EN
@@ -466,6 +490,11 @@ void tk_handle(void)
     printf("sys reset\n"); // 表示系统刚上电 / 被复位
 #endif                     //   #if USE_MY_DEBUG
 
+    // 测试用到的引脚：
+    // P1_MD1 &= ~GPIO_P15_MODE_SEL(0x03);
+    // P1_MD1 |= GPIO_P15_MODE_SEL(0x01);
+    // FOUT_S15 = GPIO_FOUT_AF_FUNC;
+
     /* 系统主循环 */
     while (1)
     {
@@ -482,42 +511,18 @@ void tk_handle(void)
             flag_is_reinitialize_touch = 0;
             /* 按键初始化 */
             tk_param_init();
+
+            // P15 = ~P15;
+
+            // printf("touch reinitialize\n");
         }
 
-        // show_addr_info_save_by_type();
-        // show_addr_info_save_by_nums();
+        // if (recv_rf_flag)
+        // {
+        //     recv_rf_flag = 0;
 
-        // delay_ms(500);
-
-        // 测试通过
-        // LED6 = 1;
-        // delay_ms(500);
-        // LED6 = 0;
-        // delay_ms(500);
-
-        // 测试通过
-        // LED7 = 1;
-        // delay_ms(500);
-        // LED7 = 0;
-        // delay_ms(500);
-
-        // P12 = ~P12;
-
-        // flash_erase_sector(FLASH_DEVICE_START_ADDR);
-        // rf_learn();
-
-        // rf_recv();
-
-        // rf_recv_databuf();
-
-        /* 调试打印函数，如果不需要打印则在tk_conf.h中将TK_DEBUG_EN设置为0 */
-#if TK_DEBUG_EN
-        if ((__tk_ms_flag >= 1) && (__tk_adjust_done_peng))
-        {
-            __tk_ms_flag = 0;
-            tk_debug_func();
-        }
-#endif
+        //     printf("recv data 0x %lx\n", rf_data);
+        // }
 
         /* 喂狗 :建议不要关闭看门狗，默认2s复位*/
         WDT_KEY = WDT_KEY_VAL(0xAA);

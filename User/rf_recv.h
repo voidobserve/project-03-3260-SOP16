@@ -6,9 +6,9 @@
 
 #include "my_config.h"
 
-#ifndef RFIN
-#define RFIN P02 // RF½ÓÊÕÒı½Å
-#endif           // end def RFIN
+// #ifndef RFIN
+// #define RFIN P02 // RF½ÓÊÕÒı½Å
+// #endif           // end def RFIN
 
 #if 0
 
@@ -39,8 +39,8 @@ void rf_recv_databuf(void); // ½ÓÊÕRFĞÅºÅµ½»º³åÇøÖĞ£¬½ÓÊÕn´ÎĞÅºÅ£¨nÊÇÊı×éÖ§³ÖµÄÔ
 // Èç¹û³öÏÖ´ÎÊıÒ»Ñù¶à£¬Ö»»á·µ»Ø´ÎÊıÒ»ÑùµÄµÚÒ»¸öÔªËØ
 void appear_themost(u32 *arr, u32 arr_len, u32 *element, u32 *index);
 
-void tmr0_enable(void);  // ¿ªÆô¶¨Ê±Æ÷TMR0£¬¿ªÊ¼¼ÆÊ±
-void tmr0_disable(void); // ¹Ø±Õ¶¨Ê±Æ÷0£¬Çå¿Õ¼ÆÊıÖµ
+// void tmr0_enable(void);  // ¿ªÆô¶¨Ê±Æ÷TMR0£¬¿ªÊ¼¼ÆÊ±
+// void tmr0_disable(void); // ¹Ø±Õ¶¨Ê±Æ÷0£¬Çå¿Õ¼ÆÊıÖµ
 
 u8 rf_addr_isMatch(void);
 
